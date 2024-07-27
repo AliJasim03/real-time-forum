@@ -15,7 +15,8 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = t.ExecuteTemplate(w, "layout", data)
+
+	err = t.Execute(w, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -31,7 +32,7 @@ func (s *server) indexHandler(w http.ResponseWriter, r *http.Request) {
 	var posts []backend.Post
 	backend.GetPosts(s.db, userID, &posts)
 	Categories := backend.GetCategories(s.db)
-	renderTemplate(w, "index", map[string]interface{}{
+	renderTemplate(w, "layout", map[string]interface{}{
 		"Title":      "Homepage",
 		"isLoggedIn": isLoggedIn,
 		"Posts":      posts,

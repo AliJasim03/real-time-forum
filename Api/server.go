@@ -10,34 +10,37 @@ import (
 )
 
 type server struct {
-	mux *http.ServeMux
-	db  *sql.DB
+	mux          *http.ServeMux
+	db           *sql.DB
+	eventManager *socketsManager
 }
 
 func New(db *sql.DB) *server {
 	return &server{
-		mux: http.NewServeMux(),
-		db:  db,
+		mux:          http.NewServeMux(),
+		db:           db,
+		eventManager: makeSocketManager(),
 	}
 }
 
 func (s *server) Init() {
 
+	go s.SendPings() // for testing websockets
 	// Serve static files (CSS, JavaScript, etc.)
 	s.mux.Handle("/front-end/static/", http.StripPrefix("/front-end/static/", http.FileServer(http.Dir("./front-end/static"))))
 
 	// Define routes
 	s.mux.HandleFunc("/", s.indexHandler)
+	s.mux.HandleFunc("/events", s.events)
 	s.mux.HandleFunc("/filterCreatedPost", s.filterCreatedPost)
 	s.mux.HandleFunc("/filterLikedPost", s.filterLikedPost)
-
 
 	s.mux.HandleFunc("/login", s.loginPage)
 	s.mux.HandleFunc("/loginAction", s.login)
 
 	s.mux.HandleFunc("/register", s.registerPage)
 	s.mux.HandleFunc("/registerAction", s.registration)
-	
+
 	s.mux.HandleFunc("/logout", s.logout)
 
 	s.mux.HandleFunc("/createPost", s.createPostPage)
@@ -58,7 +61,6 @@ func (s *server) Init() {
 		log.Fatal("ListenAndServe: ", err)
 	}
 }
-
 
 func open(url string) error {
 	var cmd string
