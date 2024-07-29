@@ -4,7 +4,7 @@ $(document).ready(function () {
 
     // Define routes
     const routes = {
-        '/': homePage,
+        '/': Templates.Index.homePage,
         '/login': Templates.Login.loginPage,
         '/register': Templates.register.registerPage,
         //'/my-posts': myPostsPage,
@@ -79,11 +79,4 @@ function updateNavbar(isLoggedIn) {
     }
 }
 
-function homePage() {
-    const app = document.getElementById('app');
-    Templates.Index.loadCategories();
-    Templates.Index.loadPosts();
-    app.innerHTML = Templates.Index.index;
-
-}
 

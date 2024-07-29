@@ -24,7 +24,6 @@ func New(db *sql.DB) *server {
 }
 
 func (s *server) Init() {
-
 	go s.SendPings() // for testing websockets
 	// Serve static files (CSS, JavaScript, etc.)
 	s.mux.Handle("/front-end/static/", http.StripPrefix("/front-end/static/", http.FileServer(http.Dir("./front-end/static"))))
@@ -34,23 +33,24 @@ func (s *server) Init() {
 
 	s.mux.HandleFunc("/events", s.events)
 
-	s.mux.HandleFunc("/loginAction", s.login)
+	// API routes
+	s.mux.HandleFunc("/api/loginAction", s.login)
+	s.mux.HandleFunc("/api/registerAction", s.registration)
+	s.mux.HandleFunc("/api/logout", s.logout)
+	s.mux.HandleFunc("/api/createPostAction", s.createPost)
 
-	s.mux.HandleFunc("/registerAction", s.registration)
+	s.mux.HandleFunc("/api/categories", s.getCategories)
+	s.mux.HandleFunc("/api/posts", s.getPosts)
 
-	s.mux.HandleFunc("/logout", s.logout)
+	s.mux.HandleFunc("/api/createCommentAction", s.createComment)
+	s.mux.HandleFunc("/api/likeOrDislikeComment", s.likeDislikeComment)
+	s.mux.HandleFunc("/api/likeOrDislikePost", s.likeDislikePost)
 
-	s.mux.HandleFunc("/createPostAction", s.createPost)
+	s.mux.HandleFunc("/api/getPostLikesAndDislikesCount", s.getPostLikesAndDislikesCount)
+	s.mux.HandleFunc("/api/getCommentLikeDislikeCount", s.getCommentLikesAndDislikesCount)
 
-
-	s.mux.HandleFunc("/createCommentAction", s.createComment)
-	s.mux.HandleFunc("/likeOrDislikeComment", s.likeDislikeComment)
-	s.mux.HandleFunc("/likeOrDislikePost", s.likeDislikePost)
-
-	s.mux.HandleFunc("/getPostLikesAndDislikesCount", s.getPostLikesAndDislikesCount)
-	s.mux.HandleFunc("/getCommentLikeDislikeCount", s.getCommentLikesAndDislikesCount)
 	fmt.Println("Server is running on http://localhost:8080/")
-	//open in browser
+	// open in browser
 	open("http://localhost:8080/")
 	if err := http.ListenAndServe(":8080", s.mux); err != nil {
 		log.Fatal("ListenAndServe: ", err)

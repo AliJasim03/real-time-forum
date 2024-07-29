@@ -103,22 +103,18 @@ export function createPost() {
         });
 }
 
-export function showError(message) {
-    const errorDiv = document.getElementById('error');
+function showError(message) {
+    const errorDiv = $('#error');
     errorDiv.innerHTML = message;
     errorDiv.classList.remove('d-none');
     errorDiv.style.display = 'block';
-    setTimeout(() => {
-        errorDiv.style.display = 'none';
-    }, 3000);
+    errorDiv.fadeOut(3000);
 }
 
-export function showSuccess(message) {
+function showSuccess(message) {
     const successDiv = document.getElementById('success');
     successDiv.innerHTML = message;
     successDiv.classList.remove('d-none');
     successDiv.style.display = 'block';
-    setTimeout(() => {
-        successDiv.style.display = 'none';
-    }, 3000);
+    errorDiv.fadeOut(3000);
 }

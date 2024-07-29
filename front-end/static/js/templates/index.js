@@ -34,12 +34,12 @@ export const index = `
         </script>
 `;
 
-export function loadCategories() {
+export async function loadCategories() {
     fetch('/api/categories')
         .then(response => response.json())
         .then(data => {
             const categoriesSelect = document.getElementById('categories');
-            data.categories.forEach(category => {
+            data.forEach(category => {
                 const option = document.createElement('option');
                 option.value = category.Name;
                 option.textContent = category.Name;
@@ -48,13 +48,14 @@ export function loadCategories() {
         });
 }
 
-export function loadPosts() {
+export async function loadPosts() {
     fetch('/api/posts')
         .then(response => response.json())
         .then(data => {
+            debugger;
             const postsContainer = document.getElementById('posts-container');
             postsContainer.innerHTML = '';
-            data.posts.forEach(post => {
+            data.forEach(post => {
                 const postDiv = document.createElement('div');
                 postDiv.className = `col-md-4 mb-5 ${post.Categories.join(' ')}`;
                 postDiv.id = post.ID;
@@ -64,3 +65,11 @@ export function loadPosts() {
         });
 }
 
+
+
+export async function homePage() {
+    const app = document.getElementById('app');
+    app.innerHTML = index;
+    await loadCategories();
+    await loadPosts();
+}

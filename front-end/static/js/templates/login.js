@@ -71,9 +71,10 @@ export function loginAction() {
         });
 }
 
-export function showError(message) {
-    const errorDiv = document.getElementById('error');
+function showError(message) {
+    const errorDiv = $('#error');
     errorDiv.innerHTML = message;
     errorDiv.classList.remove('d-none');
     errorDiv.style.display = 'block';
+    errorDiv.fadeOut(3000);
 }

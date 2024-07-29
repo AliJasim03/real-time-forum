@@ -218,3 +218,17 @@ func (s *server) getCommentLikesAndDislikesCount(w http.ResponseWriter, r *http.
 	}
 	json.NewEncoder(w).Encode(counts)
 }
+
+func (s *server) getCategories(w http.ResponseWriter, r *http.Request) {
+	categories := backend.GetCategories(s.db)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(categories)
+}
+
+func (s *server) getPosts(w http.ResponseWriter, r *http.Request) {
+	_, userID := s.authenticateCookie(r)
+	var posts []backend.Post
+	backend.GetPosts(s.db, userID, &posts)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(posts)
+}
