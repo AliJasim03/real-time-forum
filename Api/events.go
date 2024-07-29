@@ -7,7 +7,7 @@ import (
 )
 
 func (s *server) indexHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "front-end/templates/layout.html")
+	http.ServeFile(w, r, "front-end/templates/index.html")
 }
 
 // listen for event from the server
@@ -38,7 +38,6 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) sendEvents(data interface{}) {
-
 	s.eventManager.lock.Lock()
 
 	for _, socket := range s.eventManager.sockets {
@@ -67,5 +66,4 @@ func (s *server) SendPings() {
 		event.Count++
 		time.Sleep(1 * time.Second)
 	}
-
 }
