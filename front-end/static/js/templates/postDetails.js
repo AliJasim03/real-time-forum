@@ -1,4 +1,4 @@
-function postPage(postId) {
+export function postPage(postId) {
     // Fetch post data from the backend
     fetch(`/api/post?id=${postId}`)
         .then(response => response.json())
@@ -76,7 +76,7 @@ function postPage(postId) {
         });
 }
 
-function submitComment(postId) {
+export function submitComment(postId) {
     const comment = document.getElementById('comment').value;
 
     if (comment.trim() === "") {
@@ -111,7 +111,7 @@ function submitComment(postId) {
         });
 }
 
-function likeDislikeComment(commentId, action) {
+export function likeDislikeComment(commentId, action) {
     const data = JSON.stringify({
         ID: commentId,
         IsLike: action
@@ -140,7 +140,7 @@ function likeDislikeComment(commentId, action) {
         });
 }
 
-function showError(message) {
+export function showError(message) {
     const errorDiv = document.getElementById('error');
     errorDiv.innerHTML = message;
     errorDiv.classList.remove('d-none');

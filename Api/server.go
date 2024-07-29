@@ -31,22 +31,17 @@ func (s *server) Init() {
 
 	// Define routes
 	s.mux.HandleFunc("/", s.indexHandler)
-	s.mux.HandleFunc("/events", s.events)
-	s.mux.HandleFunc("/filterCreatedPost", s.filterCreatedPost)
-	s.mux.HandleFunc("/filterLikedPost", s.filterLikedPost)
 
-	s.mux.HandleFunc("/login", s.loginPage)
+	s.mux.HandleFunc("/events", s.events)
+
 	s.mux.HandleFunc("/loginAction", s.login)
 
-	s.mux.HandleFunc("/register", s.registerPage)
 	s.mux.HandleFunc("/registerAction", s.registration)
 
 	s.mux.HandleFunc("/logout", s.logout)
 
-	s.mux.HandleFunc("/createPost", s.createPostPage)
 	s.mux.HandleFunc("/createPostAction", s.createPost)
 
-	s.mux.HandleFunc("/post", s.postPage)
 
 	s.mux.HandleFunc("/createCommentAction", s.createComment)
 	s.mux.HandleFunc("/likeOrDislikeComment", s.likeDislikeComment)

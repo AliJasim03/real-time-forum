@@ -3,7 +3,7 @@ function loginAction() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    if(hasSpaces(email) || hasSpaces(password)){
+    if (hasSpaces(email) || hasSpaces(password)) {
         $("#error").html("Email and password cannot contain spaces");
         $("#error").show();
         $("#error").removeClass("d-none");
@@ -42,7 +42,7 @@ function checkEmail(email) {
     return re.test(email);
 }
 
-function hasSpaces(string){
+function hasSpaces(string) {
     return string.includes(" ");
 }
 
@@ -51,7 +51,7 @@ function registerAction() {
     const email = document.getElementById('email').value;
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
-    if(hasSpaces(email) || hasSpaces(username) || hasSpaces(password)){
+    if (hasSpaces(email) || hasSpaces(username) || hasSpaces(password)) {
         $("#error").html("Email and password and username cannot contain spaces");
         $("#error").show();
         $("#error").removeClass("d-none");
@@ -145,28 +145,45 @@ function updateCounters(postID) {
     });
 }
 
-
 $(document).ready(function () {
-    // Get current page URL path
-    var currentPath = window.location.pathname;
+    // Map of IDs to routes
+    const idToRoute = {
+        'home-link': '/',
+        'login-link': '/login',
+        'register-link': '/register',
+        'new-post-link': '/new-post',
+        'my-posts-link': '/my-posts',
+        'liked-posts-link': '/liked-posts',
+        'logout-link': '/logout'
+    };
 
-    // Iterate over each nav-link element
-    $('.nav-link').each(function () {
-        // Get the href attribute
-        var href = $(this).attr('href');
+    // Function to update the active class based on the current path
+    function updateActiveClass() {
+        var currentPath = window.location.pathname;
 
-        // Ensure href is in the same format as currentPath for comparison
-        // Prepend a '/' if href does not start with it
-        if (!href.startsWith('/')) {
-            href = '/' + href;
-        }
+        // Iterate over each nav-link element
+        $('.nav-link').each(function () {
+            // Get the id attribute
+            var id = $(this).attr('id');
 
-        // Check if href matches currentPath
-        if (href === currentPath) {
-            // Remove 'active' class from all nav-link elements
-            $('.nav-link').removeClass('active');
-            // Add 'active' class to the matching nav-link element
-            $(this).addClass('active');
-        }
+            // Check if the id matches the currentPath
+            if (idToRoute[id] === currentPath) {
+                // Remove 'active' class from all nav-link elements
+                $('.nav-link').removeClass('active');
+                // Add 'active' class to the matching nav-link element
+                $(this).addClass('active');
+            }
+        });
+    }
+
+    // Initial call to set the active class on page load
+    updateActiveClass();
+
+    // Add click event listener to each nav-link element
+    $('.nav-link').on('click', function () {
+        // Simulate a page navigation by updating the window location
+        window.history.pushState({}, '', idToRoute[$(this).attr('id')]);
+        // Update the active class
+        updateActiveClass();
     });
 });

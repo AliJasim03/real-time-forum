@@ -1,4 +1,4 @@
-function loginPage() {
+export function loginPage() {
     const app = document.getElementById('app');
     app.innerHTML = `
         <script src="front-end/static/js/scripts.js"></script>
@@ -34,7 +34,7 @@ function loginPage() {
     });
 }
 
-function loginAction() {
+export function loginAction() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
@@ -71,7 +71,7 @@ function loginAction() {
         });
 }
 
-function showError(message) {
+export function showError(message) {
     const errorDiv = document.getElementById('error');
     errorDiv.innerHTML = message;
     errorDiv.classList.remove('d-none');

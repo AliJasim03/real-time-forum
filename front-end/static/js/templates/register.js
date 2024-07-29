@@ -1,4 +1,4 @@
-function registerPage() {
+export function registerPage() {
     const app = document.getElementById('app');
     app.innerHTML = `
         <script src="front-end/static/js/scripts.js"></script>
@@ -37,7 +37,7 @@ function registerPage() {
     });
 }
 
-function registerAction() {
+export function registerAction() {
     const email = document.getElementById('email').value;
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
@@ -76,7 +76,7 @@ function registerAction() {
         });
 }
 
-function showError(message) {
+export function showError(message) {
     const errorDiv = document.getElementById('error');
     errorDiv.innerHTML = message;
     errorDiv.classList.remove('d-none');

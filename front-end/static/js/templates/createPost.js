@@ -1,4 +1,4 @@
-function createPostPage() {
+export function createPostPage() {
     // Fetch categories from the backend
     fetch('/api/categories')
         .then(response => response.json())
@@ -50,7 +50,7 @@ function createPostPage() {
         });
 }
 
-function createPost() {
+export function createPost() {
     const createBtn = document.getElementById('create-btn');
     createBtn.disabled = true;
 
@@ -103,7 +103,7 @@ function createPost() {
         });
 }
 
-function showError(message) {
+export function showError(message) {
     const errorDiv = document.getElementById('error');
     errorDiv.innerHTML = message;
     errorDiv.classList.remove('d-none');
@@ -113,7 +113,7 @@ function showError(message) {
     }, 3000);
 }
 
-function showSuccess(message) {
+export function showSuccess(message) {
     const successDiv = document.getElementById('success');
     successDiv.innerHTML = message;
     successDiv.classList.remove('d-none');

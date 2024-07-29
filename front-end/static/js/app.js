@@ -1,17 +1,17 @@
-import * as Templates from "./templates";
+import * as Templates from './templates/export.js';
 
 $(document).ready(function () {
 
     // Define routes
     const routes = {
         '/': homePage,
-        '/login': loginPage,
-        '/register': registerPage,
-        '/my-posts': myPostsPage,
-        '/liked-posts': likedPostsPage,
-        '/new-post': newPostPage,
-        '/create-post': createPostPage,
-        '/post-details': postPage
+        '/login': Templates.Login.loginPage,
+        '/register': Templates.register.registerPage,
+        //'/my-posts': myPostsPage,
+        // '/liked-posts': likedPostsPage,
+        '/new-post': Templates.createPost.createPostPage,
+        '/create-post': Templates.createPostPage,
+        '/post-details': Templates.postPage
     };
 
     // Check login status
@@ -81,8 +81,9 @@ function updateNavbar(isLoggedIn) {
 
 function homePage() {
     const app = document.getElementById('app');
-    app.innerHTML = Templates.index;
-    Templates.loadCategories();
-    Templates.loadPosts();
+    Templates.Index.loadCategories();
+    Templates.Index.loadPosts();
+    app.innerHTML = Templates.Index.index;
+
 }
 

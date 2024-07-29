@@ -1,4 +1,4 @@
-import { post } from "./post.js";
+import { postTemplate } from './post.js';
 
 export const index = `
 <script src="front-end/static/js/scripts.js"></script>
@@ -48,7 +48,7 @@ export function loadCategories() {
         });
 }
 
-function loadPosts() {
+export function loadPosts() {
     fetch('/api/posts')
         .then(response => response.json())
         .then(data => {
@@ -58,7 +58,7 @@ function loadPosts() {
                 const postDiv = document.createElement('div');
                 postDiv.className = `col-md-4 mb-5 ${post.Categories.join(' ')}`;
                 postDiv.id = post.ID;
-                postDiv.innerHTML = post;
+                postDiv.innerHTML = postTemplate(post);
                 postsContainer.appendChild(postDiv);
             });
         });

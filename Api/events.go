@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+func (s *server) indexHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "front-end/templates/layout.html")
+}
+
 // listen for event from the server
 func (s *server) events(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
