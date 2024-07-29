@@ -1,57 +1,44 @@
 import * as Templates from './templates/export.js';
 
-$(document).ready(function () {
+// Define routes
+const routes = {
+    '/': Templates.Index.homePage,
+    '/login': Templates.Login.loginPage,
+    '/register': Templates.register.registerPage,
+    //'/my-posts': myPostsPage,
+    // '/liked-posts': likedPostsPage,
+    '/new-post': Templates.createPost.createPostPage,
+    '/create-post': Templates.createPostPage,
+    '/post-details': Templates.postPage
+};
 
-    // Define routes
-    const routes = {
-        '/': Templates.Index.homePage,
-        '/login': Templates.Login.loginPage,
-        '/register': Templates.register.registerPage,
-        //'/my-posts': myPostsPage,
-        // '/liked-posts': likedPostsPage,
-        '/new-post': Templates.createPost.createPostPage,
-        '/create-post': Templates.createPostPage,
-        '/post-details': Templates.postPage
-    };
+// Check login status
+const isLoggedIn = false; // This should be replaced with actual login status check
 
-    // Check login status
-    const isLoggedIn = false; // This should be replaced with actual login status check
+// Update navbar based on login status
+updateNavbar(isLoggedIn);
 
-    // Update navbar based on login status
-    updateNavbar(isLoggedIn);
+// Handle navigation
+export function navigate(path) {
+    window.history.pushState({}, path, window.location.origin + path);
+    updateView(path);
+}
 
-    // Attach event listeners to navigation links
-    $('#home-link').on('click', () => navigate('/'));
-    $('#login-link').on('click', () => navigate('/login'));
-    $('#register-link').on('click', () => navigate('/register'));
-    $('#my-posts-link').on('click', () => navigate('/my-posts'));
-    $('#liked-posts-link').on('click', () => navigate('/liked-posts'));
-    $('#new-post-link').on('click', () => navigate('/new-post'));
-    $('#logout-link').on('click', () => logout());
-
-
-    // Handle navigation
-    function navigate(path) {
-        window.history.pushState({}, path, window.location.origin + path);
-        updateView(path);
+// Update the view based on the current path
+function updateView(path) {
+    const view = routes[path];
+    if (view) {
+        $('#app').innerHTML = view();
     }
+}
 
-    // Update the view based on the current path
-    function updateView(path) {
-        const view = routes[path];
-        if (view) {
-            $('#app').innerHTML = view();
-        }
-    }
-
-    // Handle browser back and forward buttons
-    window.onpopstate = () => {
-        updateView(window.location.pathname);
-    };
-
-    // Initialize the view
+// Handle browser back and forward buttons
+window.onpopstate = () => {
     updateView(window.location.pathname);
-});
+};
+
+// Initialize the view
+updateView(window.location.pathname);
 
 
 // Function to update the navbar based on login status
@@ -79,4 +66,16 @@ function updateNavbar(isLoggedIn) {
     }
 }
 
+$(document).ready(function () {
+    // Attach event listeners to navigation links
+    $('#home-link').on('click', () => navigate('/'));
+    $('#login-link').on('click', () => navigate('/login'));
+    $('#register-link').on('click', () => navigate('/register'));
+    $('#my-posts-link').on('click', () => navigate('/my-posts'));
+    $('#liked-posts-link').on('click', () => navigate('/liked-posts'));
+    $('#new-post-link').on('click', () => navigate('/new-post'));
+    $('#logout-link').on('click', () => logout());
 
+    // Initialize the view
+    updateView(window.location.pathname);
+});

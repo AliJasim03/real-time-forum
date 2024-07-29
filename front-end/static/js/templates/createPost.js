@@ -103,18 +103,5 @@ export function createPost() {
         });
 }
 
-function showError(message) {
-    const errorDiv = $('#error');
-    errorDiv.innerHTML = message;
-    errorDiv.classList.remove('d-none');
-    errorDiv.style.display = 'block';
-    errorDiv.fadeOut(3000);
-}
 
-function showSuccess(message) {
-    const successDiv = document.getElementById('success');
-    successDiv.innerHTML = message;
-    successDiv.classList.remove('d-none');
-    successDiv.style.display = 'block';
-    errorDiv.fadeOut(3000);
-}
+

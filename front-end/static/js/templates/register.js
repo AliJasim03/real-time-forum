@@ -1,3 +1,5 @@
+import { navigate } from '../app.js'; // Adjust the import path based on your directory structure
+
 export function registerPage() {
     const app = document.getElementById('app');
     app.innerHTML = `
@@ -7,6 +9,7 @@ export function registerPage() {
         <div class="col-md-6">
             <h2 class="text-center mt-5 mb-4">Register</h2>
             <div class="alert alert-danger d-none" id="error"></div>
+            <div class="alert alert-success d-none" id="success"></div>
             <div class="row">
                 <div class="col-md-6 form-group mb-3">
                     <label for="first-name">First Name</label>
@@ -26,11 +29,11 @@ export function registerPage() {
             <div class="form-group mb-3">
                 <label>Gender</label><br>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="gender" id="gender-male" value="Male">
+                    <input class="form-check-input" type="radio" name="gender" id="gender-male" value="M">
                     <label class="form-check-label" for="gender-male">Male</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="gender" id="gender-female" value="Female">
+                    <input class="form-check-input" type="radio" name="gender" id="gender-female" value="F">
                     <label class="form-check-label" for="gender-female">Female</label>
                 </div>
             </div>
@@ -75,23 +78,29 @@ export function registerAction() {
     const password = $('#password').val();
 
     // Check if there are empty fields or contain only spaces
-    if (
-        !firstName.trim() ||
-        !lastName.trim() ||
-        !age.trim() ||
-        !gender ||
-        !email.trim() ||
-        !username.trim() ||
-        !password.trim()
-    ) {
-        showError("Missing required fields");
+    // if (
+    //     !firstName.trim() ||
+    //     !lastName.trim() ||
+    //     !age.trim() ||
+    //     !gender ||
+    //     !email.trim() ||
+    //     !username.trim() ||
+    //     !password.trim()
+    // ) {
+    //     showError("Missing required fields");
+    //     return;
+    // }
+
+    const ageNum = parseInt(age);
+
+    if (!validationFields(ageNum, email, username, password)) {
         return;
     }
 
     const data = JSON.stringify({
         first_name: firstName,
         last_name: lastName,
-        age: age,
+        age: ageNum,
         email: email,
         gender: gender,
         username: username,
@@ -106,24 +115,37 @@ export function registerAction() {
         body: data
     })
         .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => { throw new Error(text) });
-            }
-            return response.json();
-        })
-        .then(response => {
             // Handle successful registration
-            window.location.href = '/'; // Redirect to the login page
+            showSuccess("Registration successful");
+            setTimeout(() => {
+                navigate('/'); // Redirect to the login page
+            }, 1000);
         })
         .catch(error => {
             showError(error.message);
         });
 }
 
-function showError(message) {
-    const errorDiv = document.getElementById('error');
-    errorDiv.innerHTML = message;
-    errorDiv.classList.remove('d-none');
-    errorDiv.style.display = 'block';
-    errorDiv.fadeOut(3000);
+
+function validationFields(ageNum, email, username, password) {
+    if (isNaN(ageNum) || ageNum < 1) {
+        showError("Invalid age");
+        return false;
+    }
+
+    if (!checkEmail(email)) {
+        showError("Invalid email");
+        return false;
+    }
+
+    if (hasSpaces(email)) {
+        showError("Email cannot contain spaces");
+        return false;
+    }
+    if (hasSpaces(password)) {
+        showError("Password cannot contain spaces");
+        return false;
+    }
+    return true;
 }
+

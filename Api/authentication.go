@@ -16,13 +16,17 @@ type LoginJson struct {
 }
 
 type RegisterJson struct {
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Email     string `json:"email"`
+	Username  string `json:"username"`
+	Password  string `json:"password"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Age       int    `json:"age"`
+	Gender    string `json:"gender"`
 }
 
 var emptyCookie = &http.Cookie{
-	Name:     "token", //l don't if l should change name or not because it same to the cookie of token
+	Name:     "token", // l don't if l should change name or not because it same to the cookie of token
 	Value:    "",
 	Expires:  time.Unix(0, 0),
 	HttpOnly: true,
@@ -30,7 +34,6 @@ var emptyCookie = &http.Cookie{
 }
 
 func (s *server) registration(res http.ResponseWriter, req *http.Request) {
-
 	if req.Method != http.MethodPost {
 		http.Error(res, "method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -44,8 +47,25 @@ func (s *server) registration(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// check if all field used
-	if registration.Email == "" || registration.Username == "" || registration.Password == "" {
+	if registration.Email == "" ||
+		registration.Username == "" ||
+		registration.Password == "" ||
+		registration.FirstName == "" ||
+		registration.LastName == "" ||
+		registration.Age == 0 ||
+		registration.Gender == "" {
 		http.Error(res, "missing required fields", http.StatusBadRequest)
+		return
+	}
+
+	// check if age is not number and not negative
+	if registration.Age < 0 || registration.Age > 120 {
+		http.Error(res, "invalid age", http.StatusBadRequest)
+		return
+	}
+
+	if registration.Gender != "F" && registration.Gender != "M" {
+		http.Error(res, "invalid gender stop trolling with F12", http.StatusBadRequest)
 		return
 	}
 
@@ -74,21 +94,22 @@ func (s *server) registration(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, "username already registered", http.StatusConflict)
 		return
 	}
-	//hash the pass to store it
+	// hash the pass to store it
 	hashPass, err := bcrypt.GenerateFromPassword([]byte(registration.Password), bcrypt.DefaultCost)
 	if err != nil {
 		http.Error(res, "Server error", http.StatusInternalServerError)
 		return
 	}
 
-	//insert data
-	_, err = s.db.Exec("INSERT INTO users (email, username, password)VALUES(?, ?, ?)", registration.Email, registration.Username, hashPass)
+	// insert data
+	_, err = s.db.Exec("INSERT INTO users (email, username, password, first_name, last_name, age, gender) VALUES(?, ?, ?, ?, ?, ?, ?)",
+		registration.Email, registration.Username, hashPass, registration.FirstName, registration.LastName, registration.Age, registration.Gender)
 	if err != nil {
 		http.Error(res, "Server error", http.StatusInternalServerError)
 		return
 	}
 
-	//get the user id
+	// get the user id
 	var userID int
 	err = s.db.QueryRow("SELECT id FROM users WHERE email = ?", registration.Email).Scan(&userID)
 	if err != nil {
@@ -102,17 +123,19 @@ func (s *server) registration(res http.ResponseWriter, req *http.Request) {
 	}
 
 	http.SetCookie(res, &cookie)
-	http.Redirect(res, req, "/", http.StatusSeeOther)
+	// set stats to ok
+	res.WriteHeader(http.StatusOK)
+	// return ok message
+	res.Write([]byte("Registration successful"))
 }
 
 func (s *server) login(res http.ResponseWriter, req *http.Request) {
-
 	if req.Method != http.MethodPost {
 		http.Error(res, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	//get them values the body request json
+	// get them values the body request json
 	var login LoginJson
 
 	err := json.NewDecoder(req.Body).Decode(&login)
@@ -149,7 +172,6 @@ func (s *server) login(res http.ResponseWriter, req *http.Request) {
 
 	http.SetCookie(res, &cookie)
 	http.Redirect(res, req, "/", http.StatusSeeOther)
-
 }
 
 func (s *server) logout(res http.ResponseWriter, req *http.Request) {
@@ -179,7 +201,6 @@ func (s *server) logout(res http.ResponseWriter, req *http.Request) {
 }
 
 func (s *server) generateCookie(userID string) (http.Cookie, error) {
-
 	sessionToken, err := uuid.NewV4()
 	if err != nil {
 		return http.Cookie{}, fmt.Errorf("failed to generate session token: %w", err)
@@ -190,7 +211,7 @@ func (s *server) generateCookie(userID string) (http.Cookie, error) {
 	// Format the future time
 	formattedTime := futureTime.Format("2006-01-02 15:04:05")
 
-	//check if the cookie exit in db
+	// check if the cookie exit in db
 	_, err = s.db.Exec("DELETE FROM sessions WHERE user_id = ?", userID)
 	if err != nil {
 		return http.Cookie{}, fmt.Errorf("failed to delete old session: %w", err)
@@ -221,7 +242,7 @@ func (s *server) authenticateCookie(r *http.Request) (bool, int) {
 	var userID int
 	var expiresAt time.Time
 
-	//get the cookie to use token to get userID
+	// get the cookie to use token to get userID
 	err = s.db.QueryRow("SELECT user_id, expires_at FROM sessions WHERE session_token = ?", sessionToken).Scan(&userID, &expiresAt)
 	if err != nil || expiresAt.Before(time.Now()) {
 		return false, -1

@@ -1,93 +1,3 @@
-function loginAction() {
-    event.preventDefault(); // Prevent the default form submission
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    if (hasSpaces(email) || hasSpaces(password)) {
-        $("#error").html("Email and password cannot contain spaces");
-        $("#error").show();
-        $("#error").removeClass("d-none");
-        $("#error").fadeOut(5000);
-        return;
-    }
-    if (!checkEmail(email)) {
-        $("#error").html("Invalid email address");
-        $("#error").show();
-        $("#error").removeClass("d-none");
-        $("#error").fadeOut(5000);
-        return;
-    }
-    $.ajax({
-        url: "/loginAction",
-        type: "POST",
-        data: JSON.stringify({
-            email: email,
-            password: password
-        }),
-        contentType: "application/json",
-        success: function (data) {
-            window.location.href = "/";
-        },
-        error: function (data) {
-            $("#error").html(data.responseText); // Assuming your server sends plain text error messages
-            $("#error").show();
-            $("#error").removeClass("d-none");
-            $("#error").fadeOut(5000);
-        }
-    });
-}
-
-function checkEmail(email) {
-    var re = /\S+@\S+\.\S+/;
-    return re.test(email);
-}
-
-function hasSpaces(string) {
-    return string.includes(" ");
-}
-
-function registerAction() {
-    event.preventDefault(); // Prevent the default form submission
-    const email = document.getElementById('email').value;
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    if (hasSpaces(email) || hasSpaces(username) || hasSpaces(password)) {
-        $("#error").html("Email and password and username cannot contain spaces");
-        $("#error").show();
-        $("#error").removeClass("d-none");
-        $("#error").fadeOut(5000);
-        return;
-    }
-
-    if (!checkEmail(email)) {
-        $("#error").html("Invalid email address");
-        $("#error").show();
-        $("#error").removeClass("d-none");
-        $("#error").fadeOut(5000);
-        return;
-    }
-
-    $.ajax({
-        url: "/registerAction",
-        type: "POST",
-        data: JSON.stringify({
-            email: email,
-            username: username,
-            password: password
-        }),
-        contentType: "application/json",
-        success: function (data) {
-            window.location.href = "/";
-        },
-        error: function (data) {
-            $("#error").html(data.responseText); // Assuming your server sends plain text error messages
-            $("#error").show();
-            $("#error").removeClass("d-none");
-            $("#error").fadeOut(5000);
-        }
-    });
-}
-
 function likeDislikePost(postID, isLike) {
     event.preventDefault(); // Prevent the default form submission
     $.ajax({
@@ -186,4 +96,30 @@ $(document).ready(function () {
         // Update the active class
         updateActiveClass();
     });
+
 });
+
+function checkEmail(email) {
+    var re = /\S+@\S+\.\S+/;
+    return re.test(email);
+}
+
+function hasSpaces(string) {
+    return string.includes(" ");
+}
+function showError(message) {
+    const errorDiv = $('#error');
+    errorDiv.text(message);
+    errorDiv.removeClass('d-none');
+    errorDiv.show().delay(3000).fadeOut();
+}
+
+function showSuccess(message) {
+    debugger;
+    const successDiv = $('#success');
+    successDiv.text(message);
+    successDiv.removeClass('d-none');
+    successDiv.show().delay(3000).fadeOut();
+}
+
+

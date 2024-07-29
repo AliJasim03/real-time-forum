@@ -64,17 +64,11 @@ export function loginAction() {
         })
         .then(response => {
             // Handle successful login
+            //show login success message
+            showSuccess("Login successful");
             window.location.href = '/'; // Redirect to the home page or dashboard
         })
         .catch(error => {
             showError(error.message);
         });
-}
-
-function showError(message) {
-    const errorDiv = $('#error');
-    errorDiv.innerHTML = message;
-    errorDiv.classList.remove('d-none');
-    errorDiv.style.display = 'block';
-    errorDiv.fadeOut(3000);
 }
