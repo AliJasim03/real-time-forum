@@ -1,7 +1,8 @@
 function likeDislikePost(postID, isLike) {
+    debugger;
     event.preventDefault(); // Prevent the default form submission
     $.ajax({
-        url: "/likeOrDislikePost",
+        url: "/api/likeOrDislikePost",
         type: "POST",
         data: JSON.stringify({
             ID: postID,
@@ -28,18 +29,14 @@ function likeDislikePost(postID, isLike) {
             updateCounters(postID);
         },
         error: function (response) {
-            alert(response.responseText);
-            $("#error").html(response.responseText); // Assuming your server sends plain text error messages
-            $("#error").show();
-            $("#error").removeClass("d-none");
-            $("#error").fadeOut(5000);
+            showError(response.responseText);
         }
     });
 }
 
 function updateCounters(postID) {
     $.ajax({
-        url: "/getPostLikesAndDislikesCount",
+        url: "/api/getPostLikesAndDislikesCount",
         type: "POST",
         data: JSON.stringify({
             ID: postID

@@ -42,6 +42,9 @@ func (s *server) Init() {
 	s.mux.HandleFunc("/api/categories", s.getCategories)
 	s.mux.HandleFunc("/api/posts", s.getPosts)
 
+	s.mux.HandleFunc("/api/myPosts", s.myPosts)
+	s.mux.HandleFunc("/api/likedPosts", s.likedPosts)
+
 	s.mux.HandleFunc("/api/createPostAction", s.createPost)
 	s.mux.HandleFunc("/api/likeOrDislikePost", s.likeDislikePost)
 

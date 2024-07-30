@@ -5,8 +5,8 @@ const routes = {
     '/': Templates.Index.homePage,
     '/login': Templates.Login.loginPage,
     '/register': Templates.register.registerPage,
-    //'/my-posts': myPostsPage,
-    // '/liked-posts': likedPostsPage,
+    '/my-posts': Templates.Index.myPostsPage,
+    '/liked-posts': Templates.Index.likedPostsPage,
     '/new-post': Templates.createPost.createPostPage,
     '/create-post': Templates.createPostPage,
     '/post-details': Templates.postPage

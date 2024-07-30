@@ -232,3 +232,31 @@ func (s *server) getPosts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)
 }
+
+func (s *server) myPosts(w http.ResponseWriter, r *http.Request) {
+	_, userID := s.authenticateCookie(r)
+	var posts []backend.Post
+	var filteredPosts []backend.Post
+	backend.GetPosts(s.db, userID, &posts)
+	for i := 0; i < len(posts); i++ {
+		if posts[i].IsCreatedByUser {
+			filteredPosts = append(filteredPosts, posts[i])
+		}
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(filteredPosts)
+}
+
+func (s *server) likedPosts(w http.ResponseWriter, r *http.Request) {
+	_, userID := s.authenticateCookie(r)
+	var posts []backend.Post
+	var filteredPosts []backend.Post
+	backend.GetPosts(s.db, userID, &posts)
+	for i := 0; i < len(posts); i++ {
+		if posts[i].Like.IsLiked {
+			filteredPosts = append(filteredPosts, posts[i])
+		}
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(filteredPosts)
+}

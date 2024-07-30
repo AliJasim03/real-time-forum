@@ -50,8 +50,9 @@ export async function loadCategories() {
         });
 }
 
-export async function loadPosts() {
-    fetch('/api/posts')
+export async function loadPosts(filterUrl) {
+    debugger;
+    fetch(filterUrl)
         .then(response => response.json())
         .then(data => {
             const postsContainer = $('#posts-container');
@@ -75,5 +76,21 @@ export async function homePage() {
     const app = $('#app');
     app.html(index);
     await loadCategories();
-    await loadPosts();
+    await loadPosts('/api/posts');
+}
+
+export async function myPostsPage() {
+    debugger;
+    const app = $('#app');
+    app.html(index);
+    await loadCategories();
+    await loadPosts('/api/myPosts');
+}
+
+export async function likedPostsPage() {
+    debugger;
+    const app = $('#app');
+    app.html(index);
+    await loadCategories();
+    await loadPosts('/api/likedPosts');
 }
