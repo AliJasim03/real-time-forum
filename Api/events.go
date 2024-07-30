@@ -7,7 +7,7 @@ import (
 )
 
 func (s *server) indexHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "front-end/templates/index.html")
+	http.ServeFile(w, r, "front-end/index.html")
 }
 
 // listen for event from the server

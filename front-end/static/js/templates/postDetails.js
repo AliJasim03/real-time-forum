@@ -17,7 +17,6 @@ export function postPage(postId) {
                 '<div class="card mb-4"><div class="card-body"><p class="card-text">No comments yet. Be the first to comment!</p></div></div>' :
                 comments.map(comment => Comment.generateComment(comment));
 
-
             const app = $('#app');
             app.html(`
                 <script src="front-end/static/js/scripts.js"></script>
