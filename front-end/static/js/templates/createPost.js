@@ -1,10 +1,10 @@
-export function createPostPage() {
+export async function createPostPage() {
     // Fetch categories from the backend
     fetch('/api/categories')
         .then(response => response.json())
         .then(data => {
-            const app = document.getElementById('app');
-            app.innerHTML = `
+            const app = $('#app');
+            app.html(`
                 <div class="container px-4 px-lg-5">
                     <div class="row justify-content-center">
                         <div class="col-md-6">
@@ -21,10 +21,10 @@ export function createPostPage() {
                             </div>
                             <label for="content">Categories: </label>
                             <div class="form-group mb-3" id="categories-container">
-                                ${data.categories.map(category => `
+                                ${data.map(category => `
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="categories" value="${category.Name}" id="flexCheckDefault">
-                                        <label class="form-check-label" for="flexCheckDefault">
+                                        <input class="form-check-input" type="checkbox" name="categories" value="${category.Name}" id="flexCheckDefault-${category.Name}">
+                                        <label class="form-check-label" for="flexCheckDefault-${category.Name}">
                                             ${category.Name}
                                         </label>
                                     </div>
@@ -35,40 +35,39 @@ export function createPostPage() {
                     </div>
                 </div>
                 <br>
-            `;
+            `);
 
             // Add event listener for the create post button
-            document.getElementById('create-btn').addEventListener('click', createPost);
+            $('#create-btn').click(createPost);
 
             // Hide alerts on keypress
-            document.querySelectorAll("input, textarea").forEach(element => {
-                element.addEventListener('keypress', () => {
-                    document.getElementById('error').classList.add('d-none');
-                    document.getElementById('success').classList.add('d-none');
-                });
+            // Hide error message on keypress
+            $('input').on('keypress', function () {
+                $('#error').addClass('d-none');
             });
+
         });
+
 }
 
 export function createPost() {
-    const createBtn = document.getElementById('create-btn');
-    createBtn.disabled = true;
+    const createBtn = $('#create-btn');
+    createBtn.prop('disabled', true);
 
-    const title = document.getElementById('title').value;
-    const content = document.getElementById('content').value;
+    const title = $('#title').val().trim();
+    const content = $('#content').val().trim();
     const categories = Array.from(document.querySelectorAll("input[name='categories']:checked")).map(el => el.value);
 
     // Check if the title and content are empty or contain only spaces
-    if (title.trim() === "" || content.trim() === "") {
+    if (title === "" || content === "") {
         showError("Title and Content are required");
         createBtn.disabled = false;
         return;
     }
-
     // Check if the categories are empty
     if (categories.length === 0) {
         showError("Categories are required");
-        createBtn.disabled = false;
+        createBtn.prop('disabled', false);
         return;
     }
 
@@ -78,7 +77,7 @@ export function createPost() {
         Categories: categories
     });
 
-    fetch('/createPostAction', {
+    fetch('/api/createPostAction', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -99,7 +98,7 @@ export function createPost() {
         })
         .catch(error => {
             showError(error.message);
-            createBtn.disabled = false;
+            createBtn.prop('disabled', false);
         });
 }
 

@@ -51,7 +51,6 @@ export async function loadCategories() {
 }
 
 export async function loadPosts(filterUrl) {
-    debugger;
     fetch(filterUrl)
         .then(response => response.json())
         .then(data => {

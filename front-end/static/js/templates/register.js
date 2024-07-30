@@ -67,23 +67,23 @@ export function registerPage() {
 
 export function registerAction() {
 
-    const firstName = $('#first-name').val();
-    const lastName = $('#last-name').val();
-    const age = $('#age').val();
+    const firstName = $('#first-name').val().trim();
+    const lastName = $('#last-name').val().trim();
+    const age = $('#age').val().trim();
     const gender = $('input[name="gender"]:checked').val();
-    const email = $('#email').val();
-    const username = $('#username').val();
-    const password = $('#password').val();
+    const email = $('#email').val().trim();
+    const username = $('#username').val().trim();
+    const password = $('#password').val().trim();
 
     // Check if there are empty fields or contain only spaces
     if (
-        !firstName.trim() ||
-        !lastName.trim() ||
-        !age.trim() ||
+        !firstName ||
+        !lastName ||
+        !age ||
         !gender ||
-        !email.trim() ||
-        !username.trim() ||
-        !password.trim()
+        !email ||
+        !username ||
+        !password
     ) {
         showError("Missing required fields");
         return;
