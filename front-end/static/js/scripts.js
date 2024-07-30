@@ -1,5 +1,4 @@
 function likeDislikePost(postID, isLike) {
-    debugger;
     event.preventDefault(); // Prevent the default form submission
     $.ajax({
         url: "/api/likeOrDislikePost",

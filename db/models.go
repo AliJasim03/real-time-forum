@@ -41,8 +41,8 @@ type PostJson struct {
 }
 
 type CommentJson struct {
-	PostID  string `json:"PostID"`
-	Comment string `json:"comment"`
+	PostID  int    `json:"PostID"`
+	Comment string `json:"Content"`
 }
 
 type IDJson struct {

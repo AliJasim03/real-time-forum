@@ -7,9 +7,9 @@ import (
 )
 
 func GetPosts(db *sql.DB, user int, posts *[]Post) {
-	rows, err := db.Query("SELECT id, user_id, title, content, strftime('%Y-%m-%d %H:%M:%S', created_at) AS created_at FROM posts")
+	rows, err := db.Query("SELECT id, user_id, title, content, strftime('%Y-%m-%d %H:%M:%S', created_at) AS created_at FROM posts ORDER BY created_at DESC")
 	if err != nil {
-		fmt.Println(err) 
+		fmt.Println(err)
 		return
 	}
 	defer rows.Close()
@@ -89,60 +89,6 @@ func GetPosts(db *sql.DB, user int, posts *[]Post) {
 			(*posts)[i].Like.IsDisliked = isDisliked > 0
 		}
 	}
-	// comments in each post
-	/*
-		for i := range *posts {
-			rows, err := db.Query("SELECT * FROM comments WHERE post_id = ?", (*posts)[i].ID)
-			if err != nil {
-				fmt.Println(err) return
-			}
-			defer rows.Close()
-			for rows.Next() {
-				comment := &Comments{}
-				var userId int
-				err = rows.Scan(&comment.ID, &comment.PostID, &userId, &comment.Content, &comment.CreatedOn)
-				if err != nil {
-					fmt.Println(err) return
-				}
-				comment.CreatedBy = GetUsername(db, userId)
-				// convert user to
-				if user == userId {
-					comment.IsCreatedByUser = true
-				}
-				(*posts)[i].Comments = append((*posts)[i].Comments, *comment)
-			}
-			// get the likes and dislikes of the comments
-			for j := range (*posts)[i].Comments {
-				var likes, dislikes int
-				err = db.QueryRow("SELECT COUNT(*) FROM likes WHERE comment_id = ? AND is_like = ?", (*posts)[i].Comments[j].ID, true).Scan(&likes)
-				if err != nil {
-					fmt.Println(err) return
-				}
-				err = db.QueryRow("SELECT COUNT(*) FROM likes WHERE comment_id = ? AND is_like = ?", (*posts)[i].Comments[j].ID, false).Scan(&dislikes)
-				if err != nil {
-					fmt.Println(err) return
-				}
-				(*posts)[i].Comments[j].Like.CountLikes = likes
-				(*posts)[i].Comments[j].Like.CountDislikes = dislikes
-			}
-			if user != -1 {
-				// get the likes and dislikes of the user
-				for j := range (*posts)[i].Comments {
-					var isLiked, isDisliked int
-					err = db.QueryRow("SELECT COUNT(*) FROM likes WHERE comment_id = ? AND user_id = ? AND is_like = ?", (*posts)[i].Comments[j].ID, user, true).Scan(&isLiked)
-					if err != nil {
-						fmt.Println(err) return
-					}
-					err = db.QueryRow("SELECT COUNT(*) FROM likes WHERE comment_id = ? AND user_id = ? AND is_like = ?", (*posts)[i].Comments[j].ID, user, false).Scan(&isDisliked)
-					if err != nil {
-						fmt.Println(err) return
-					}
-					(*posts)[i].Comments[j].Like.IsLiked = isLiked > 0
-					(*posts)[i].Comments[j].Like.IsDisliked = isDisliked > 0
-				}
-			}
-		}
-	*/
 }
 
 func GetPost(db *sql.DB, user int, post *Post) {
@@ -213,9 +159,9 @@ func GetPost(db *sql.DB, user int, post *Post) {
 
 	rows, err = db.Query("SELECT id, post_id, user_id, content, strftime('%Y-%m-%d %H:%M:%S', created_at) AS created_at FROM comments WHERE post_id = ?", post.ID)
 	if err != nil {
-		fmt.Println(err) 
+		fmt.Println(err)
 		return
-		
+
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -223,9 +169,9 @@ func GetPost(db *sql.DB, user int, post *Post) {
 		var userId int
 		err = rows.Scan(&comment.ID, &comment.PostID, &userId, &comment.Content, &comment.CreatedOn)
 		if err != nil {
-			fmt.Println(err) 
+			fmt.Println(err)
 			return
-			
+
 		}
 		comment.CreatedBy = GetUsername(db, userId)
 		// convert user to
@@ -237,12 +183,12 @@ func GetPost(db *sql.DB, user int, post *Post) {
 		var likes, dislikes int
 		err = db.QueryRow("SELECT COUNT(*) FROM likes WHERE comment_id = ? AND is_like = ?", comment.ID, true).Scan(&likes)
 		if err != nil {
-			fmt.Println(err) 
+			fmt.Println(err)
 			return
 		}
 		err = db.QueryRow("SELECT COUNT(*) FROM likes WHERE comment_id = ? AND is_like = ?", comment.ID, false).Scan(&dislikes)
 		if err != nil {
-			fmt.Println(err) 
+			fmt.Println(err)
 			return
 		}
 		comment.Like.CountLikes = likes
@@ -253,12 +199,12 @@ func GetPost(db *sql.DB, user int, post *Post) {
 			var isLiked, isDisliked int
 			err = db.QueryRow("SELECT COUNT(*) FROM likes WHERE comment_id = ? AND user_id = ? AND is_like = ?", comment.ID, user, true).Scan(&isLiked)
 			if err != nil {
-				fmt.Println(err) 
+				fmt.Println(err)
 				return
 			}
 			err = db.QueryRow("SELECT COUNT(*) FROM likes WHERE comment_id = ? AND user_id = ? AND is_like = ?", comment.ID, user, false).Scan(&isDisliked)
 			if err != nil {
-				fmt.Println(err) 
+				fmt.Println(err)
 				return
 			}
 			comment.Like.IsLiked = isLiked > 0
@@ -274,7 +220,7 @@ func GetUsername(db *sql.DB, id int) string {
 	var username string
 	err := db.QueryRow("SELECT username FROM users WHERE id = ?", id).Scan(&username)
 	if err != nil {
-		fmt.Println(err) 
+		fmt.Println(err)
 		return ""
 	}
 	return username
@@ -293,28 +239,28 @@ func LikeDislikePost(db *sql.DB, userID int, postID string, isLike bool) bool {
 		var oldVal bool
 		err = db.QueryRow("SELECT is_like FROM likes WHERE user_id = ? AND post_id = ?", userID, postID).Scan(&oldVal)
 		if err != nil {
-			fmt.Println(err) 
+			fmt.Println(err)
 			return false
 		}
 		// delete if the value is the same
 		if oldVal == isLike {
 			_, err = db.Exec("DELETE FROM likes WHERE user_id = ? AND post_id = ?", userID, postID)
 			if err != nil {
-				fmt.Println(err) 
+				fmt.Println(err)
 				return false
 			}
 			return true
 		}
 		_, err = db.Exec("UPDATE likes SET is_like = ? WHERE user_id = ? AND post_id = ?", !oldVal, userID, postID)
 		if err != nil {
-			fmt.Println(err) 
+			fmt.Println(err)
 			return false
 		}
 		return true
 	}
 	_, err = db.Exec("INSERT INTO likes (user_id, post_id, is_like, created_at) VALUES(?,?,?,?)", userID, postID, isLike, time.Now().Format("2006-01-02 15:04:05"))
 	if err != nil {
-		fmt.Println(err) 
+		fmt.Println(err)
 		return false
 	}
 	return true

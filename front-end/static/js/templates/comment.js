@@ -64,9 +64,7 @@ export function submitComment(postId) {
         });
 }
 export function likeDislikeComment(commentId, action) {
-
     const commentID = commentId.toString();
-
     const data = JSON.stringify({
         ID: commentID,
         IsLike: action

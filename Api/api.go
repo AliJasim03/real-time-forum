@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	backend "forum/db"
 )
@@ -114,7 +115,7 @@ func (s *server) createComment(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, "Failed to decode request body", http.StatusBadRequest)
 		return
 	}
-	if comment.Comment == "" || comment.PostID == "" {
+	if comment.Comment == "" || comment.PostID == 0 {
 		http.Error(res, "PostID & comment are required", http.StatusBadRequest)
 		return
 	}
@@ -158,15 +159,14 @@ func (s *server) likeDislikeComment(w http.ResponseWriter, r *http.Request) {
 	}
 	// save like to the database for the user
 	ok := backend.LikeDislikeComment(s.db, userID, LikeDis.ID, isLike)
-	if ok {
-		isLiked := backend.KnowCommentLike(s.db, userID, LikeDis.ID)
-		// return data to the client that the like is success
-		w.Header().Set("Content-Type", "application/json")
-		// return isliked
-		json.NewEncoder(w).Encode(isLiked)
-		return
+	if !ok {
+		http.Error(w, "can't make like", http.StatusInternalServerError)
 	}
-	http.Error(w, "can't make like", http.StatusInternalServerError)
+	isLiked := backend.KnowCommentLike(s.db, userID, LikeDis.ID)
+	// return data to the client that the like is success
+	w.Header().Set("Content-Type", "application/json")
+	// return isliked
+	json.NewEncoder(w).Encode(isLiked)
 }
 
 func (s *server) getPostLikesAndDislikesCount(w http.ResponseWriter, r *http.Request) {
@@ -223,6 +223,32 @@ func (s *server) getCategories(w http.ResponseWriter, r *http.Request) {
 	categories := backend.GetCategories(s.db)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(categories)
+}
+
+func (s *server) getPost(w http.ResponseWriter, r *http.Request) {
+	_, userID := s.authenticateCookie(r)
+	post := backend.Post{}
+	// check if the post id is valid
+	postID := r.URL.Query().Get("id")
+	if postID == "" {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+	}
+	// convert string to int
+	id, err := strconv.Atoi(postID)
+	if err != nil {
+		// handle error
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+	}
+	post.ID = id
+	backend.GetPost(s.db, userID, &post)
+	// check if post was not nil
+	if post.Title == "" {
+		http.Error(w, "Post not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(post)
 }
 
 func (s *server) getPosts(w http.ResponseWriter, r *http.Request) {

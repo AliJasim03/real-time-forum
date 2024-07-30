@@ -4,17 +4,15 @@ import * as Templates from './templates/export.js';
 const routes = {
     '/': Templates.Index.homePage,
     '/login': Templates.Login.loginPage,
-    '/register': Templates.register.registerPage,
+    '/register': Templates.Register.registerPage,
     '/my-posts': Templates.Index.myPostsPage,
     '/liked-posts': Templates.Index.likedPostsPage,
     '/new-post': Templates.createPost.createPostPage,
-    '/create-post': Templates.createPostPage,
-    '/post-details': Templates.postPage
+    '/post': Templates.postDetails.postPage
 };
 
 // Check login status
 var isLoggedIn = await checkAuth(); // This should be replaced with actual login status check
-
 
 // Handle navigation
 export async function navigate(path) {
@@ -97,7 +95,6 @@ async function checkAuth() {
 }
 
 async function logout() {
-    debugger;
     fetch('/api/logout', {
         method: 'GET',
         headers: {
@@ -110,6 +107,7 @@ async function logout() {
         //show logout success message
         showSuccess("Logout successful");
         isLoggedIn = false;
+        navigate('/');
         updateNavbar(isLoggedIn);
     }).catch(error => {
         showError(error.message);
