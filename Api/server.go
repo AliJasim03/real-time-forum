@@ -37,14 +37,16 @@ func (s *server) Init() {
 	s.mux.HandleFunc("/api/loginAction", s.login)
 	s.mux.HandleFunc("/api/registerAction", s.registration)
 	s.mux.HandleFunc("/api/logout", s.logout)
-	s.mux.HandleFunc("/api/createPostAction", s.createPost)
+	s.mux.HandleFunc("/api/checkAuth", s.checkAuth)
 
 	s.mux.HandleFunc("/api/categories", s.getCategories)
 	s.mux.HandleFunc("/api/posts", s.getPosts)
 
+	s.mux.HandleFunc("/api/createPostAction", s.createPost)
+	s.mux.HandleFunc("/api/likeOrDislikePost", s.likeDislikePost)
+
 	s.mux.HandleFunc("/api/createCommentAction", s.createComment)
 	s.mux.HandleFunc("/api/likeOrDislikeComment", s.likeDislikeComment)
-	s.mux.HandleFunc("/api/likeOrDislikePost", s.likeDislikePost)
 
 	s.mux.HandleFunc("/api/getPostLikesAndDislikesCount", s.getPostLikesAndDislikesCount)
 	s.mux.HandleFunc("/api/getCommentLikeDislikeCount", s.getCommentLikesAndDislikesCount)

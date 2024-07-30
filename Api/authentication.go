@@ -24,6 +24,9 @@ type RegisterJson struct {
 	Age       int    `json:"age"`
 	Gender    string `json:"gender"`
 }
+type isAuth struct {
+	IsAuth bool `json:"isAuth"`
+}
 
 var emptyCookie = &http.Cookie{
 	Name:     "token", // l don't if l should change name or not because it same to the cookie of token
@@ -125,8 +128,6 @@ func (s *server) registration(res http.ResponseWriter, req *http.Request) {
 	http.SetCookie(res, &cookie)
 	// set stats to ok
 	res.WriteHeader(http.StatusOK)
-	// return ok message
-	res.Write([]byte("Registration successful"))
 }
 
 func (s *server) login(res http.ResponseWriter, req *http.Request) {
@@ -171,7 +172,8 @@ func (s *server) login(res http.ResponseWriter, req *http.Request) {
 	}
 
 	http.SetCookie(res, &cookie)
-	http.Redirect(res, req, "/", http.StatusSeeOther)
+	// set stats to ok
+	res.WriteHeader(http.StatusOK)
 }
 
 func (s *server) logout(res http.ResponseWriter, req *http.Request) {
@@ -196,8 +198,21 @@ func (s *server) logout(res http.ResponseWriter, req *http.Request) {
 
 	// put the empty cookie
 	http.SetCookie(res, emptyCookie)
+	// set stats to ok
+	res.WriteHeader(http.StatusOK)
+}
 
-	http.Redirect(res, req, "/", http.StatusSeeOther)
+func (s *server) checkAuth(res http.ResponseWriter, req *http.Request) {
+	authenticateCookie, _ := s.authenticateCookie(req)
+	res.Header().Set("Content-Type", "application/json")
+	if !authenticateCookie {
+		res.WriteHeader(http.StatusOK)
+		// return false
+		json.NewEncoder(res).Encode(isAuth{IsAuth: false})
+		return
+	}
+	res.WriteHeader(http.StatusOK)
+	json.NewEncoder(res).Encode(isAuth{IsAuth: true})
 }
 
 func (s *server) generateCookie(userID string) (http.Cookie, error) {

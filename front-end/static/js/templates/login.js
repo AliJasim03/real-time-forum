@@ -1,6 +1,6 @@
 export function loginPage() {
-    const app = document.getElementById('app');
-    app.innerHTML = `
+    const app = $('#app');
+    app.html(`
         <script src="front-end/static/js/scripts.js"></script>
         <div class="container px-4 px-lg-5">
             <div class="row justify-content-center">
@@ -21,22 +21,21 @@ export function loginPage() {
             </div>
         </div>
         <br>
-    `;
+    `);
 
     // Add event listener for the login button
-    document.getElementById('login-btn').addEventListener('click', loginAction);
+    $('#login-btn').click(loginAction);
 
     // Hide error message on keypress
-    document.querySelectorAll("input").forEach(element => {
-        element.addEventListener('keypress', () => {
-            document.getElementById('error').classList.add('d-none');
-        });
+    $('input').on('keypress', function () {
+        $('#error').addClass('d-none');
     });
+
 }
 
 export function loginAction() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    const email = $('#email').val();
+    const password = $('#password').val();
 
     // Check if the email and password are empty or contain only spaces
     if (email.trim() === "" || password.trim() === "") {
@@ -49,7 +48,7 @@ export function loginAction() {
         password: password
     });
 
-    fetch('/loginAction', {
+    fetch('/api/loginAction', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -60,15 +59,13 @@ export function loginAction() {
             if (!response.ok) {
                 return response.text().then(text => { throw new Error(text) });
             }
-            return response.json();
-        })
-        .then(response => {
             // Handle successful login
             //show login success message
             showSuccess("Login successful");
             window.location.href = '/'; // Redirect to the home page or dashboard
         })
         .catch(error => {
+            debugger;
             showError(error.message);
         });
 }

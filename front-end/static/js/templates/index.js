@@ -3,6 +3,7 @@ import { postTemplate } from './post.js';
 export const index = `
 <script src="front-end/static/js/scripts.js"></script>
         <div class="container px-4 px-lg-5">
+            <div class="alert alert-danger d-none mt-3" id="error"></div>
             <div class="card text-white bg-secondary my-5 py-4 text-center">
                 <div class="card-body">
                     <p class="text-white m-0">Explore, engage, and expand your knowledge with our community forum.</p>
@@ -29,7 +30,7 @@ export const index = `
             });
 
             document.addEventListener('DOMContentLoaded', (event) => {
-                document.getElementById('categories').value = 'All';
+                $("#categories").val('All');
             });
         </script>
 `;
@@ -38,12 +39,13 @@ export async function loadCategories() {
     fetch('/api/categories')
         .then(response => response.json())
         .then(data => {
-            const categoriesSelect = document.getElementById('categories');
+            const categoriesSelect = $('#categories');
             data.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category.Name;
-                option.textContent = category.Name;
-                categoriesSelect.appendChild(option);
+                const option = $('<option>', {
+                    value: category.Name,
+                    text: category.Name
+                });
+                categoriesSelect.append(option);
             });
         });
 }
@@ -52,15 +54,17 @@ export async function loadPosts() {
     fetch('/api/posts')
         .then(response => response.json())
         .then(data => {
-            debugger;
-            const postsContainer = document.getElementById('posts-container');
-            postsContainer.innerHTML = '';
+            const postsContainer = $('#posts-container');
+            postsContainer.html('');
             data.forEach(post => {
-                const postDiv = document.createElement('div');
-                postDiv.className = `col-md-4 mb-5 ${post.Categories.join(' ')}`;
-                postDiv.id = post.ID;
-                postDiv.innerHTML = postTemplate(post);
-                postsContainer.appendChild(postDiv);
+
+                const postDiv = $('<div>', {
+                    class: `col-md-4 mb-5 ${post.Categories.join(' ')}`,
+                    id: post.ID,
+                    html: postTemplate(post)
+                });
+
+                postsContainer.append(postDiv);
             });
         });
 }
@@ -68,8 +72,8 @@ export async function loadPosts() {
 
 
 export async function homePage() {
-    const app = document.getElementById('app');
-    app.innerHTML = index;
+    const app = $('#app');
+    app.html(index);
     await loadCategories();
     await loadPosts();
 }

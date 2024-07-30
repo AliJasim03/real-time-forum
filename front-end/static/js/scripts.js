@@ -64,7 +64,6 @@ $(document).ready(function () {
         'new-post-link': '/new-post',
         'my-posts-link': '/my-posts',
         'liked-posts-link': '/liked-posts',
-        'logout-link': '/logout'
     };
 
     // Function to update the active class based on the current path

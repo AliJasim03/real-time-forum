@@ -13,13 +13,11 @@ const routes = {
 };
 
 // Check login status
-const isLoggedIn = false; // This should be replaced with actual login status check
+var isLoggedIn = await checkAuth(); // This should be replaced with actual login status check
 
-// Update navbar based on login status
-updateNavbar(isLoggedIn);
 
 // Handle navigation
-export function navigate(path) {
+export async function navigate(path) {
     window.history.pushState({}, path, window.location.origin + path);
     updateView(path);
 }
@@ -28,7 +26,7 @@ export function navigate(path) {
 function updateView(path) {
     const view = routes[path];
     if (view) {
-        $('#app').innerHTML = view();
+        view();
     }
 }
 
@@ -36,10 +34,6 @@ function updateView(path) {
 window.onpopstate = () => {
     updateView(window.location.pathname);
 };
-
-// Initialize the view
-updateView(window.location.pathname);
-
 
 // Function to update the navbar based on login status
 function updateNavbar(isLoggedIn) {
@@ -66,7 +60,7 @@ function updateNavbar(isLoggedIn) {
     }
 }
 
-$(document).ready(function () {
+$(document).ready(async function () {
     // Attach event listeners to navigation links
     $('#home-link').on('click', () => navigate('/'));
     $('#login-link').on('click', () => navigate('/login'));
@@ -74,8 +68,52 @@ $(document).ready(function () {
     $('#my-posts-link').on('click', () => navigate('/my-posts'));
     $('#liked-posts-link').on('click', () => navigate('/liked-posts'));
     $('#new-post-link').on('click', () => navigate('/new-post'));
-    $('#logout-link').on('click', () => logout());
+    $('#logout-link').on('click', async () => await logout());
 
     // Initialize the view
     updateView(window.location.pathname);
+
+    await checkAuth();
+
 });
+
+async function checkAuth() {
+    fetch('/api/checkAuth', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text) });
+        }
+        return response.json();
+    }).then(response => {
+        isLoggedIn = response.isAuth;
+        updateNavbar(isLoggedIn);
+    }).catch(error => {
+        showError(error);
+    });
+}
+
+async function logout() {
+    debugger;
+    fetch('/api/logout', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text) });
+        }
+        //show logout success message
+        showSuccess("Logout successful");
+        isLoggedIn = false;
+        updateNavbar(isLoggedIn);
+    }).catch(error => {
+        showError(error.message);
+    });
+
+}
+

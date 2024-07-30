@@ -1,8 +1,8 @@
 import { navigate } from '../app.js'; // Adjust the import path based on your directory structure
 
 export function registerPage() {
-    const app = document.getElementById('app');
-    app.innerHTML = `
+    const app = $('#app');
+    app.html(`
 <script src="front-end/static/js/scripts.js"></script>
 <div class="container px-4 px-lg-5">
     <div class="row justify-content-center">
@@ -54,16 +54,14 @@ export function registerPage() {
     </div>
 </div>
 <br>
-    `;
+    `);
 
     // Add event listener for the register button
-    document.getElementById('register-btn').addEventListener('click', registerAction);
+    $('#register-btn').click(registerAction);
 
     // Hide error message on keypress
-    document.querySelectorAll("input").forEach(element => {
-        element.addEventListener('keypress', () => {
-            document.getElementById('error').classList.add('d-none');
-        });
+    $('input').on('keypress', function () {
+        $('#error').addClass('d-none');
     });
 }
 
@@ -78,18 +76,18 @@ export function registerAction() {
     const password = $('#password').val();
 
     // Check if there are empty fields or contain only spaces
-    // if (
-    //     !firstName.trim() ||
-    //     !lastName.trim() ||
-    //     !age.trim() ||
-    //     !gender ||
-    //     !email.trim() ||
-    //     !username.trim() ||
-    //     !password.trim()
-    // ) {
-    //     showError("Missing required fields");
-    //     return;
-    // }
+    if (
+        !firstName.trim() ||
+        !lastName.trim() ||
+        !age.trim() ||
+        !gender ||
+        !email.trim() ||
+        !username.trim() ||
+        !password.trim()
+    ) {
+        showError("Missing required fields");
+        return;
+    }
 
     const ageNum = parseInt(age);
 
@@ -115,6 +113,9 @@ export function registerAction() {
         body: data
     })
         .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => { throw new Error(text) });
+            }
             // Handle successful registration
             showSuccess("Registration successful");
             setTimeout(() => {
@@ -122,6 +123,7 @@ export function registerAction() {
             }, 1000);
         })
         .catch(error => {
+            debugger;
             showError(error.message);
         });
 }
