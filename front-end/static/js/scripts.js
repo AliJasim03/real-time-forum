@@ -92,6 +92,9 @@ $(document).ready(function () {
         updateActiveClass();
     });
 
+    $('#action_menu_btn').click(function () {
+        $('.action_menu').toggle();
+    });
 });
 
 function checkEmail(email) {

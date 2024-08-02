@@ -14,8 +14,12 @@
         <!-- Core theme CSS (includes Bootstrap)-->
         <link rel="stylesheet"
             href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
         <link href="/front-end/static/css/styles.css" rel="stylesheet" />
         <link href="/front-end/static/css/custom.css" rel="stylesheet" />
+        <link href="/front-end/static/css/chat.css" rel="stylesheet">
         <script src="/front-end/static/js/socket.js"></script>
     </head>
 
@@ -56,19 +60,215 @@
                 </div>
             </div>
         </nav>
-        <div class="container min-vh-100" id="app">
-            <!-- Dynamic content will be injected here -->
+        <div class="container-fluid h-100">
+            <div class="row h-100">
+                <div class="col-md-6 col-xl-6 d-flex flex-column chat" id="chat-section">
+                    <div class="card mb-sm-3 mb-md-0 contacts_card flex-grow-1">
+                        <div class="card-header">
+                            <div class="input-group">
+                                <input type="text" placeholder="Search..." name="" class="form-control search">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text search_btn"><i class="fas fa-search"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body contacts_body">
+                            <ul class="contacts">
+                                <li class="active">
+                                    <div class="d-flex bd-highlight">
+                                        <div class="img_cont">
+                                            <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg"
+                                                class="rounded-circle user_img">
+                                            <span class="online_icon"></span>
+                                        </div>
+                                        <div class="user_info">
+                                            <span>Khalid</span>
+                                            <p>Kalid is online</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="d-flex bd-highlight">
+                                        <div class="img_cont">
+                                            <img src="https://2.bp.blogspot.com/-8ytYF7cfPkQ/WkPe1-rtrcI/AAAAAAAAGqU/FGfTDVgkcIwmOTtjLka51vineFBExJuSACLcBGAs/s320/31.jpg"
+                                                class="rounded-circle user_img">
+                                            <span class="online_icon offline"></span>
+                                        </div>
+                                        <div class="user_info">
+                                            <span>Taherah Big</span>
+                                            <p>Taherah left 7 mins ago</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="d-flex bd-highlight">
+                                        <div class="img_cont">
+                                            <img src="https://i.pinimg.com/originals/ac/b9/90/acb990190ca1ddbb9b20db303375bb58.jpg"
+                                                class="rounded-circle user_img">
+                                            <span class="online_icon"></span>
+                                        </div>
+                                        <div class="user_info">
+                                            <span>Sami Rafi</span>
+                                            <p>Sami is online</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="d-flex bd-highlight">
+                                        <div class="img_cont">
+                                            <img src="http://profilepicturesdp.com/wp-content/uploads/2018/07/sweet-girl-profile-pictures-9.jpg"
+                                                class="rounded-circle user_img">
+                                            <span class="online_icon offline"></span>
+                                        </div>
+                                        <div class="user_info">
+                                            <span>Nargis Hawa</span>
+                                            <p>Nargis left 30 mins ago</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="d-flex bd-highlight">
+                                        <div class="img_cont">
+                                            <img src="https://static.turbosquid.com/Preview/001214/650/2V/boy-cartoon-3D-model_D.jpg"
+                                                class="rounded-circle user_img">
+                                            <span class="online_icon offline"></span>
+                                        </div>
+                                        <div class="user_info">
+                                            <span>Rashid Samim</span>
+                                            <p>Rashid left 50 mins ago</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-footer"></div>
+                    </div>
+
+                    <div class="card flex-grow-1">
+                        <div class="card-header msg_head">
+                            <div class="d-flex bd-highlight">
+                                <div class="img_cont">
+                                    <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg"
+                                        class="rounded-circle user_img">
+                                    <span class="online_icon"></span>
+                                </div>
+                                <div class="user_info">
+                                    <span>Chat with Khalid</span>
+                                    <p>1767 Messages</p>
+                                </div>
+                                <div class="video_cam">
+                                    <span><i class="fas fa-video"></i></span>
+                                    <span><i class="fas fa-phone"></i></span>
+                                </div>
+                            </div>
+                            <span id="action_menu_btn"><i class="fas fa-ellipsis-v"></i></span>
+                            <div class="action_menu">
+                                <ul>
+                                    <li><i class="fas fa-user-circle"></i> View profile</li>
+                                    <li><i class="fas fa-users"></i> Add to close friends</li>
+                                    <li><i class="fas fa-plus"></i> Add to group</li>
+                                    <li><i class="fas fa-ban"></i> Block</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-body msg_card_body">
+                            <div class="d-flex justify-content-start mb-4">
+                                <div class="img_cont_msg">
+                                    <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg"
+                                        class="rounded-circle user_img_msg">
+                                </div>
+                                <div class="msg_cotainer">
+                                    Hi, how are you samim?
+                                    <span class="msg_time">8:40 AM, Today</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end mb-4">
+                                <div class="msg_cotainer_send">
+                                    Hi Khalid i am good tnx how about you?
+                                    <span class="msg_time_send">8:55 AM, Today</span>
+                                </div>
+                                <div class="img_cont_msg">
+                                    <img src="/front-end/static/assets/person.svg" class="rounded-circle user_img_msg">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-start mb-4">
+                                <div class="img_cont_msg">
+                                    <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg"
+                                        class="rounded-circle user_img_msg">
+                                </div>
+                                <div class="msg_cotainer">
+                                    I am good too, thank you for your chat template
+                                    <span class="msg_time">9:00 AM, Today</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end mb-4">
+                                <div class="msg_cotainer_send">
+                                    You are welcome
+                                    <span class="msg_time_send">9:05 AM, Today</span>
+                                </div>
+                                <div class="img_cont_msg">
+                                    <img src="/front-end/static/assets/person.svg" class="rounded-circle user_img_msg">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-start mb-4">
+                                <div class="img_cont_msg">
+                                    <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg"
+                                        class="rounded-circle user_img_msg">
+                                </div>
+                                <div class="msg_cotainer">
+                                    I am looking for your next templates
+                                    <span class="msg_time">9:07 AM, Today</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end mb-4">
+                                <div class="msg_cotainer_send">
+                                    Ok, thank you have a good day
+                                    <span class="msg_time_send">9:10 AM, Today</span>
+                                </div>
+                                <div class="img_cont_msg">
+                                    <img src="/front-end/static/assets/person.svg" class="rounded-circle user_img_msg">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-start mb-4">
+                                <div class="img_cont_msg">
+                                    <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg"
+                                        class="rounded-circle user_img_msg">
+                                </div>
+                                <div class="msg_cotainer">
+                                    Bye, see you
+                                    <span class="msg_time">9:12 AM, Today</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="input-group">
+                                <div class="input-group-append">
+                                    <span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
+                                </div>
+                                <textarea name="" class="form-control type_msg"
+                                    placeholder="Type your message..."></textarea>
+                                <div class="input-group-append">
+                                    <span class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-6 d-flex flex-column">
+                    <div class="flex-grow-1 overflow-auto" id="app">
+                        <!-- Dynamic content will be injected here -->
+                    </div>
+                </div>
+            </div>
         </div>
+
         <!-- Footer-->
         <footer class="py-5 bg-dark">
-            <div class="container px-4 px-lg-5">
-                <p class="m-0 text-center text-white">
-                    Copyright &copy; @reboot01 2024
-                </p>
-            </div>
+            <p class="m-0 text-center text-white">
+                Copyright &copy; @reboot01 2024
+            </p>
         </footer>
-        <!-- Bootstrap core JS-->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
         <!-- Core theme JS-->
         <script src="/front-end/static/js/scripts.js"></script>
         <script type="module" src="/front-end/static/js/app.js"></script>

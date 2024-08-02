@@ -1,65 +1,11 @@
-.custom-hover-dislike {
-    background-color: #dc3545;
-    /* Bootstrap danger color */
-    color: white;
-    border-color: #dc3545;
-
-
-}
-
-
-.custom-hover-like {
-    background-color: #28a745;
-    /* Bootstrap success color */
-    color: white;
-    border-color: #28a745;
-}
-
-/* html,
-body {
+/* #chat-section body,
+#chat-section html {
     height: 100%;
     margin: 0;
-    padding: 0;
-}
-
-.max-height-100vh {
-    max-height: 100vh;
-    overflow-y: auto;
-}
-
-.container-fluid {
-    height: 100%;
-}
-
-.chat-section {
-    height: 100%;
-    overflow-y: auto;
-}
-
-.contacts_card,
-.msg_card_body {
-    max-height: calc(100vh - 150px);
-overflow-y: auto;
-}
-
-#app {
-    max-height: 100vh;
-    overflow-y: auto;
-}*/
-
-
-html,
-body {
-    height: 100%;
-    margin: 0;
-
-}
-
-#chat-section,
-#app {
-    max-height: 100vh;
-    overflow-y: auto;
-}
+    background: #7F7FD5;
+    background: -webkit-linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
+    background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
+} */
 
 #chat-section .chat {
     margin-top: auto;
@@ -67,8 +13,7 @@ body {
 }
 
 #chat-section .card {
-    height: calc(100vh - 3.5rem);
-    /* Adjust the height to fit within the viewport */
+    height: 500px;
     border-radius: 15px !important;
     background-color: rgba(0, 0, 0, 0.4) !important;
 }
@@ -77,14 +22,10 @@ body {
     padding: 0.75rem 0 !important;
     overflow-y: auto;
     white-space: nowrap;
-    height: calc(100vh - 170px);
-    /* Adjust the height to fit within the viewport */
 }
 
 #chat-section .msg_card_body {
     overflow-y: auto;
-    height: calc(100vh - 200px);
-    /* Adjust the height to fit within the viewport */
 }
 
 #chat-section .card-header {
