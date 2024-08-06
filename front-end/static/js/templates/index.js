@@ -2,7 +2,6 @@ import { postTemplate } from './post.js';
 
 export const index = `
 <script src="front-end/static/js/scripts.js"></script>
-        <div class="container px-4 px-lg-5">
             <div class="alert alert-danger d-none mt-3" id="error"></div>
             <div class="card text-white bg-secondary my-5 py-4 text-center">
                 <div class="card-body">
@@ -17,7 +16,6 @@ export const index = `
             </div>
             <div class="row gx-4 gx-lg-5" id="posts-container">
             </div>
-        </div>
         <script>
             $("#categories").on("change", function () {
                 const category = $(this).val();
@@ -55,11 +53,10 @@ export async function loadPosts(filterUrl) {
         .then(response => response.json())
         .then(data => {
             const postsContainer = $('#posts-container');
-            postsContainer.html('');
             data.forEach(post => {
 
                 const postDiv = $('<div>', {
-                    class: `col-md-4 mb-5 ${post.Categories.join(' ')}`,
+                    class: `col-md-6 mb-5 ${post.Categories.join(' ')}`,
                     id: post.ID,
                     html: postTemplate(post)
                 });
