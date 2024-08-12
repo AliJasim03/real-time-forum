@@ -34,7 +34,7 @@ window.onpopstate = () => {
 };
 
 // Function to update the navbar based on login status
-function updateNavbar(isLoggedIn) {
+export function  updateNavbar(isLoggedIn) {
     if (isLoggedIn) {
 
         $('#register-link-container').addClass('d-none');

@@ -110,7 +110,6 @@ function showError(message) {
 }
 
 function showSuccess(message) {
-    debugger;
     const successDiv = $('#success');
     successDiv.text(message);
     successDiv.removeClass('d-none');

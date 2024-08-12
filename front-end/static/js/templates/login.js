@@ -65,7 +65,6 @@ export function loginAction() {
             window.location.href = '/'; // Redirect to the home page or dashboard
         })
         .catch(error => {
-            debugger;
             showError(error.message);
         });
 }

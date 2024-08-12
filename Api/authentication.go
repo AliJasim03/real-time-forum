@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -153,7 +154,7 @@ func (s *server) login(res http.ResponseWriter, req *http.Request) {
 
 	var storedPass string
 	var userID int
-	err = s.db.QueryRow("SELECT id, password FROM users WHERE email = ?", login.Email).Scan(&userID, &storedPass)
+	err = s.db.QueryRow("SELECT id, password FROM users WHERE email = ? or username = ?", login.Email, login.Email).Scan(&userID, &storedPass)
 	if err != nil {
 		http.Error(res, "invalild email or password", http.StatusUnauthorized)
 		return
@@ -188,6 +189,7 @@ func (s *server) logout(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	_, userID := s.authenticateCookie(req)
 	sessionToken := cookie.Value
 
 	_, err = s.db.Exec("DELETE FROM sessions WHERE session_token = ?", sessionToken)
@@ -195,6 +197,8 @@ func (s *server) logout(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, "fail to remove session from database", http.StatusInternalServerError)
 		return
 	}
+
+	s.eventManager.removeConnectionByUsername(strconv.Itoa(userID))
 
 	// put the empty cookie
 	http.SetCookie(res, emptyCookie)

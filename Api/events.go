@@ -3,6 +3,7 @@ package api
 import (
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -19,8 +20,20 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	connectionId := s.eventManager.addConnection(conn)
-	defer s.eventManager.removeConnection(connectionId)
+	// Retrieve the username from cookies
+	_, userID := s.authenticateCookie(r)
+
+	if userID == -1 {
+		return
+	}
+
+	username := strconv.Itoa(userID)
+
+	connectionId := s.eventManager.addConnection(conn, username)
+	defer s.removeConnection(connectionId, userID)
+
+	// Broadcast the list of online users after a new connection is added
+	s.broadcastOnlineUsers(userID)
 
 	for {
 		_, _, err := conn.ReadMessage()
@@ -28,26 +41,66 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			break
 		}
-		/*
-			if err = conn.WriteMessage(messageType, message); err != nil {
-				log.Println(err)
-				break
-			}
-		*/
+	}
+
+	// Broadcast the list of online users after a connection is removed
+
+}
+
+func (s *server) broadcastOnlineUsers(userID int) {
+	onlineUsers := s.getOnlineUsers(userID)
+	data := map[string]interface{}{
+		"type":  "onlineUsers",
+		"users": onlineUsers,
+	}
+	s.sendEventToUser(data, userID)
+}
+
+func (s *server) sendEventToUser(data interface{}, userID int) {
+	s.eventManager.lock.Lock()
+	defer s.eventManager.lock.Unlock()
+
+	for _, socket := range s.eventManager.sockets {
+		if (socket.connection != nil && !socket.closed.Load()) && socket.username == strconv.Itoa(userID) {
+			socket.connection.WriteJSON(data)
+		}
 	}
 }
 
 func (s *server) sendEvents(data interface{}) {
 	s.eventManager.lock.Lock()
+	defer s.eventManager.lock.Unlock()
 
 	for _, socket := range s.eventManager.sockets {
-		if socket.connection != nil && socket.closed.Load() == false {
+		if socket.connection != nil && !socket.closed.Load() {
 			socket.connection.WriteJSON(data)
 		}
 	}
-
-	s.eventManager.lock.Unlock()
 }
+
+// func (s *server) sendToAll(data interface{}) {
+// 	s.eventManager.lock.Lock()
+// 	defer s.eventManager.lock.Unlock()
+
+// 	for connectionId, socket := range s.eventManager.sockets {
+// 		if socket.connection != nil && !socket.closed.Load() {
+// 			err := socket.connection.WriteJSON(data)
+// 			if err != nil {
+// 				log.Printf("Error sending event to connection ID %d: %v", connectionId, err)
+// 				socket.closed.Store(true)
+// 			}
+// 		}
+// 	}
+// }
+
+// func (s *server) broadcastOnlineUsers(userID int) {
+// 	onlineUsers := s.getOnlineUsers(userID)
+// 	data := map[string]interface{}{
+// 		"type":  "onlineUsers",
+// 		"users": onlineUsers,
+// 	}
+// 	s.sendToAll(data)
+// }
 
 type pingEvent struct {
 	EventType string `json:"type"` // ping

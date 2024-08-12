@@ -79,7 +79,19 @@ CREATE TABLE IF NOT EXISTS sessions
 
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
+-- Table to store user Messages
+CREATE TABLE IF NOT EXISTS messages
+(
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    from_user_id INTEGER NOT NULL,
+    to_user_id   INTEGER NOT NULL,
+    content      TEXT    NOT NULL,
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_read      BOOLEAN  NOT NULL DEFAULT 0,
 
+    FOREIGN KEY (from_user_id) REFERENCES users (id),
+    FOREIGN KEY (to_user_id) REFERENCES users (id)
+);
 -- Insert some example categories
 INSERT OR IGNORE INTO categories (name)
 VALUES ('General'),

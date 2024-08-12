@@ -6,6 +6,14 @@ import (
 	"time"
 )
 
+func AllUsers(db *sql.DB) {
+	//rows, err := db.Query("SELECT id, user_id, title, content, strftime('%Y-%m-%d %H:%M:%S', created_at) AS created_at FROM posts ORDER BY created_at DESC")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
+}
+
 func GetPosts(db *sql.DB, user int, posts *[]Post) {
 	rows, err := db.Query("SELECT id, user_id, title, content, strftime('%Y-%m-%d %H:%M:%S', created_at) AS created_at FROM posts ORDER BY created_at DESC")
 	if err != nil {

@@ -1,4 +1,4 @@
-import { navigate } from '../app.js'; // Adjust the import path based on your directory structure
+import { navigate,updateNavbar } from '../app.js'; // Adjust the import path based on your directory structure
 
 export function registerPage() {
     const app = $('#app');
@@ -120,6 +120,7 @@ export function registerAction() {
             showSuccess("Registration successful");
             setTimeout(() => {
                 navigate('/'); // Redirect to the login page
+                updateNavbar(true);
             }, 1000);
         })
         .catch(error => {
