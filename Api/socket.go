@@ -11,12 +11,12 @@ import (
 )
 
 type socketsManager struct {
-	sockets       map[uint64]userSockets
+	sockets       map[uint64]userSocket
 	socketCounter atomic.Uint64 // opened sockets count
 	lock          sync.Mutex
 }
 
-type userSockets struct {
+type userSocket struct {
 	connection *websocket.Conn
 	username   string
 	closed     *atomic.Bool
@@ -35,7 +35,7 @@ var upgrader = websocket.Upgrader{
 func makeSocketManager() *socketsManager {
 	return &socketsManager{
 		socketCounter: atomic.Uint64{},
-		sockets:       make(map[uint64]userSockets),
+		sockets:       make(map[uint64]userSocket),
 	}
 }
 
@@ -45,7 +45,7 @@ func (e *socketsManager) addConnection(conn *websocket.Conn, username string) ui
 	e.lock.Lock()
 	defer e.lock.Unlock()
 
-	e.sockets[connectionId] = userSockets{
+	e.sockets[connectionId] = userSocket{
 		connection: conn,
 		username:   username,
 		closed:     &atomic.Bool{},
