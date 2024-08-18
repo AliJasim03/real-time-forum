@@ -21,6 +21,11 @@ type userSockets struct {
 	username   string
 	closed     *atomic.Bool
 }
+type User struct {
+	Username string
+	ID       int
+	IsOnline bool
+}
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -82,12 +87,11 @@ func (s *server) removeConnection(connectionId uint64, userID int) {
 	if socket, exists := e.sockets[connectionId]; exists {
 		socket.closed.Store(true)
 		delete(e.sockets, connectionId)
-		//s.broadcastOnlineUsers(userID)
+		// s.broadcastOnlineUsers(userID)
 		log.Printf("Connection ID %d removed for user %s", connectionId, socket.username)
 	} else {
 		log.Printf("Attempted to remove non-existent connection ID %d", connectionId)
 	}
-
 }
 
 // func (e *socketsManager) removeConnection(connectionId uint64) {
@@ -100,17 +104,11 @@ func (s *server) removeConnection(connectionId uint64, userID int) {
 // 	e.lock.Unlock()
 // }
 
-type User struct {
-	Username string
-	ID       int
-	IsOnline bool
-}
-
 func (s *server) getOnlineUsers(userID int) []User {
 	s.eventManager.lock.Lock()
 	defer s.eventManager.lock.Unlock()
 
-	//get all the usernames from the database
+	// get all the usernames from the database
 
 	rows, err := s.db.Query("SELECT username, id FROM users WHERE id != ? ORDER BY id", userID)
 	if err != nil {

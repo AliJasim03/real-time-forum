@@ -42,9 +42,7 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-
 	// Broadcast the list of online users after a connection is removed
-
 }
 
 func (s *server) broadcastOnlineUsers(userID int) {
