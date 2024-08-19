@@ -1,4 +1,5 @@
 let socket;
+// import { isLoggedIn } from "./app";
 
 function setupWebSocket() {
     socket = new WebSocket('ws://localhost:8080/events');
@@ -43,15 +44,36 @@ function sendMessage() {
 
 // Update the list of online users in the DOM
 function updateOnlineUserList(users) {
-    const userList = document.getElementById('online-users-list');
+    const userList = document.querySelector('.list-group');
     userList.innerHTML = '';
 
+/*  l Don't know why dosn't work this part
+    if (!isLoggedIn) {
+        userList.style.display = 'none';
+        return; 
+    } else {
+        userList.style.display = 'block'; 
+    }
+*/
     users.forEach(user => {
         const userItem = document.createElement('li');
-        userItem.textContent = user;
+        userItem.className = 'list-group-item';
+
+        const userLink = document.createElement('a');
+        userLink.href = `/chat?user=${user.ID}`;
+        userLink.className = 'd-flex justify-content-between align-items-center';
+        userLink.textContent = user.Username;
+
+        const statusBadge = document.createElement('span');
+        statusBadge.className = user.IsOnline ? 'badge bg-success' : 'badge bg-secondary';
+        statusBadge.textContent = user.IsOnline ? 'Online' : 'Offline';
+
+        userLink.appendChild(statusBadge);
+        userItem.appendChild(userLink);
         userList.appendChild(userItem);
     });
 }
+
 
 $(document).ready(function () {
     setupWebSocket(); // Call the function to set up the WebSocket connection

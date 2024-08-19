@@ -8,11 +8,12 @@ const routes = {
     '/my-posts': Templates.Index.myPostsPage,
     '/liked-posts': Templates.Index.likedPostsPage,
     '/new-post': Templates.createPost.createPostPage,
-    '/post': Templates.postDetails.postPage
+    '/post': Templates.postDetails.postPage,
+    '/chat': Templates.chat.chatPage
 };
 
 // Check login status
-var isLoggedIn = await checkAuth(); // This should be replaced with actual login status check
+export var isLoggedIn = await checkAuth(); // This should be replaced with actual login status check
 
 // Handle navigation
 export async function navigate(path) {
