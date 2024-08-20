@@ -2,7 +2,7 @@ export function chatPage(userID) {
     const app = $('#app');
     app.html(`
         <div class="container px-4 px-lg-5">
-            <h2 class="text-center mt-5 mb-4">Chat with User ${userID}</h2>
+            <h2 class="text-center mt-5 mb-4">Chat with: </h2>
             <div class="row">
                 <div class="col-md-8">
                     <div id="chat-messages" class="mb-3" style="height: 400px; overflow-y: auto;"></div>
@@ -29,5 +29,6 @@ function sendMessage(userID) {
 
 //load all previous messges
 function loadChat(userID) {
+    
 }
 

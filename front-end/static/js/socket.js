@@ -1,5 +1,4 @@
 let socket;
-// import { isLoggedIn } from "./app";
 
 function setupWebSocket() {
     socket = new WebSocket('ws://localhost:8080/events');
@@ -12,14 +11,20 @@ function setupWebSocket() {
 
     // Handle incoming messages from the server
     socket.onmessage = function (event) {
-        console.log('Message from server: ' + event.data);
-
         const data = JSON.parse(event.data);
-        //TODO: change to switch statement
-        if (data.type === 'onlineUsers') {
-            updateOnlineUserList(data.users);
+    
+        switch (data.type) {
+            case 'onlineUsers':
+                updateOnlineUserList(data.users);
+                break;
+            case 'chat':
+                handleChatMessage(data);
+                break;
+            default:
+                console.log('Unknown message type:', data.type);
         }
     };
+    
 
     // Handle WebSocket connection closure
     socket.onclose = function (event) {
@@ -35,6 +40,27 @@ function setupWebSocket() {
     };
 }
 
+
+
+async function checkAuth() {
+    fetch('/api/checkAuth', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text) });
+        }
+        return response.json();
+    }).then(response => {
+        isLoggedIn = response.isAuth;
+        updateNavbar(isLoggedIn);
+    }).catch(error => {
+        showError(error);
+    });
+}
+
 // Function to send a message to the server
 function sendMessage() {
     const message = 'Hello, Server!';
@@ -47,14 +73,13 @@ function updateOnlineUserList(users) {
     const userList = document.querySelector('.list-group');
     userList.innerHTML = '';
 
-/*  l Don't know why dosn't work this part
-    if (!isLoggedIn) {
+    if (!checkAuth()) {
         userList.style.display = 'none';
         return; 
     } else {
         userList.style.display = 'block'; 
     }
-*/
+
     users.forEach(user => {
         const userItem = document.createElement('li');
         userItem.className = 'list-group-item';
