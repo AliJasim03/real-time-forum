@@ -14,9 +14,13 @@ function setupWebSocket() {
         console.log('Message received:', event.data);  // Log raw data received
         const data = JSON.parse(event.data);
         
+
+
         console.log('Parsed message data:', data);  // Log parsed data
         
         switch (data.type) {
+            case 'initialConnection':
+                localStorage.setItem('currID', data.userID);
             case 'onlineUsers':
                 updateOnlineUserList(data.users);
                 break;
@@ -65,9 +69,45 @@ async function checkAuth() {
     });
 }
 
+function getCurrentUserID() {
+    return localStorage.getItem('currID');
+}
+
 // Function to send a message to the server
 function handleChatMessage(data) {
     console.log("Received message:", data);
+    console.log('l getttttt the messge but not visible',data.message);
+    displayNewMessage(data.from, data.message);
+}
+
+function displayNewMessage(fromUserID, message) {
+    console.log(message);
+    const chatContainer = document.getElementById('chat-messages');
+    const messageElement = createMessageElement({
+        FromUserID: fromUserID,
+        Content: message,
+        CreatedAt: new Date().toISOString()
+    });
+    chatContainer.appendChild(messageElement);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+function createMessageElement(message) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message');
+    messageDiv.classList.add(message.FromUserID === getCurrentUserID() ? 'sent' : 'received');
+
+    const contentP = document.createElement('p');
+    contentP.textContent = message.Content;
+
+    const timeSpan = document.createElement('span');
+    timeSpan.classList.add('message-time');
+    timeSpan.textContent = new Date(message.CreatedAt).toLocaleTimeString();
+
+    messageDiv.appendChild(contentP);
+    messageDiv.appendChild(timeSpan);
+
+    return messageDiv;
 }
 
 // Update the list of online users in the DOM

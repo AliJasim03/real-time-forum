@@ -19,6 +19,26 @@ type LikeDisJson struct {
 	IsLike string `json:"isLike"`
 }
 
+func (s *server) handleGetLastMessages(w http.ResponseWriter, r *http.Request) {
+    userID1, _ := strconv.Atoi(r.URL.Query().Get("user1"))
+    userID2, _ := strconv.Atoi(r.URL.Query().Get("user2"))
+    limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+
+    if limit == 0 {
+        limit = 10 // Default to 10 messages if not specified
+    }
+
+    messages, err := backend.GetLastMessages(s.db, userID1, userID2, limit)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(messages)
+}
+
+
 func (s *server) likeDislikePost(w http.ResponseWriter, r *http.Request) {
 	// get the cookie to use token to get userID
 	isLoggedIn, userID := s.authenticateCookie(r)

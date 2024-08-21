@@ -47,6 +47,27 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 	// Broadcast the list of online users after a connection is removed
 }
 
+func (s *server) forwardMessage(chatMessage struct {
+    Type    string `json:"type"`
+    To      string `json:"to"`
+    Message string `json:"message"`
+}, fromUserID uint64) {
+    toUserID, err := strconv.Atoi(chatMessage.To)
+    if err != nil {
+        log.Printf("Error converting 'to' to integer: %v", err)
+        return
+    }
+
+    messageData := map[string]interface{}{
+        "type":    "chat",
+        "from":    fromUserID,
+        "message": chatMessage.Message,
+    }
+
+    s.sendEventToUser(messageData, toUserID)
+}
+
+
 func (s *server) broadcastOnlineUsers(userID int) {
 	onlineUsers := s.getOnlineUsers(userID)
 	data := map[string]interface{}{

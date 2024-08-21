@@ -6,6 +6,15 @@ import (
 	"time"
 )
 
+type Message struct {
+    ID         int
+    FromUserID int
+    ToUserID   int
+    Content    string
+    CreatedAt  time.Time
+    IsRead     bool
+}
+
 func AllUsers(db *sql.DB) {
 	//rows, err := db.Query("SELECT id, user_id, title, content, strftime('%Y-%m-%d %H:%M:%S', created_at) AS created_at FROM posts ORDER BY created_at DESC")
 	// if err != nil {
@@ -463,3 +472,39 @@ func SaveMessage(db *sql.DB, content string, receiverID int, fromUserID int) err
 
     return nil
 }
+
+func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int) ([]Message, error) {
+    query := `
+        SELECT id, from_user_id, to_user_id, content, created_at, is_read 
+        FROM messages 
+        WHERE (from_user_id = ? AND to_user_id = ?) OR (from_user_id = ? AND to_user_id = ?)
+        ORDER BY created_at DESC 
+        LIMIT ?
+    `
+    rows, err := db.Query(query, userID1, userID2, userID2, userID1, limit)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var messages []Message
+    for rows.Next() {
+        var msg Message
+        err := rows.Scan(&msg.ID, &msg.FromUserID, &msg.ToUserID, &msg.Content, &msg.CreatedAt, &msg.IsRead)
+        if err != nil {
+            return nil, err
+        }
+        messages = append(messages, msg)
+    }
+
+    // Reverse the order of messages to get oldest first
+    for i := len(messages)/2 - 1; i >= 0; i-- {
+        opp := len(messages) - 1 - i
+        messages[i], messages[opp] = messages[opp], messages[i]
+    }
+
+    return messages, nil
+}
+
+
+

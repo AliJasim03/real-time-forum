@@ -38,7 +38,7 @@ func (s *server) Init() {
 	s.mux.HandleFunc("/api/registerAction", s.registration)
 	s.mux.HandleFunc("/api/logout", s.logout)
 	s.mux.HandleFunc("/api/checkAuth", s.checkAuth)
-
+	s.mux.HandleFunc("/api/getMessges", s.handleGetLastMessages)
 	s.mux.HandleFunc("/api/categories", s.getCategories)
 	s.mux.HandleFunc("/api/posts", s.getPosts)
 

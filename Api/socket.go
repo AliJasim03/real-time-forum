@@ -75,7 +75,7 @@ func (s *server) handleMessages(conn *websocket.Conn, userID uint64) {
         log.Println("Message handled successfully")
 
         // TODO: Implement message forwarding
-        // s.forwardMessage(chatMessage)
+         s.forwardMessage(chatMessage, userID)
     }
 }
 
@@ -91,9 +91,18 @@ func (e *socketsManager) addConnection(conn *websocket.Conn, username string) ui
         closed:     &atomic.Bool{},
     }
 
+    // Send the user ID to the client
+    userID, _ := strconv.Atoi(username)
+    initialMessage := map[string]interface{}{
+        "type":   "initialConnection",
+        "userID": userID,
+    }
+    conn.WriteJSON(initialMessage)
+
     log.Printf("User %s connected with connection ID %d", username, connectionId)
     return connectionId
 }
+
 
 func (e *socketsManager) removeConnectionByUsername(username string) {
     e.lock.Lock()
