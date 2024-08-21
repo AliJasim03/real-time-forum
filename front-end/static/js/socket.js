@@ -11,20 +11,24 @@ function setupWebSocket() {
 
     // Handle incoming messages from the server
     socket.onmessage = function (event) {
+        console.log('Message received:', event.data);  // Log raw data received
         const data = JSON.parse(event.data);
-    
+        
+        console.log('Parsed message data:', data);  // Log parsed data
+        
         switch (data.type) {
             case 'onlineUsers':
                 updateOnlineUserList(data.users);
                 break;
             case 'chat':
-                handleChatMessage(data);
+                handleChatMessage(data.message);
                 break;
             default:
                 console.log('Unknown message type:', data.type);
         }
     };
     
+        
 
     // Handle WebSocket connection closure
     socket.onclose = function (event) {
@@ -62,10 +66,8 @@ async function checkAuth() {
 }
 
 // Function to send a message to the server
-function sendMessage() {
-    const message = 'Hello, Server!';
-    socket.send(message);
-    console.log('Sent: ' + message);
+function handleChatMessage(data) {
+    console.log("Received message:", data);
 }
 
 // Update the list of online users in the DOM

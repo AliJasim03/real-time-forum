@@ -15,20 +15,26 @@ export function chatPage(userID) {
         </div>
     `);
 
-    $('#send-message').on('click', () => sendMessage(userID));
-    loadChat(userID);
+    $('#send-message').on('click', () => sendMessage());
+    loadChat();
 }
 
-function sendMessage(userID) {
+function sendMessage() {
+    const userID = window.location.href.split('?')[1].split('=')[1];
+    console.log(userID); // Will log the user ID from the current URL
+    console.log("it work in front");
     const message = $('#message-input').val();
     if (message.trim() !== '') {
-        socket.send(JSON.stringify({ type: 'chat', to: userID, message: message }));
+        const chatMessage = { type: 'chat', to: userID, message: message };
+        socket.send(JSON.stringify(chatMessage));
         $('#message-input').val('');
     }
 }
 
+
+
 //load all previous messges
-function loadChat(userID) {
+function loadChat() {
     
 }
 

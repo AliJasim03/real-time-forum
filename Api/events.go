@@ -32,6 +32,8 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 	connectionId := s.eventManager.addConnection(conn, username)
 	defer s.removeConnection(connectionId, userID)
 
+	go s.handleMessages(conn, uint64(userID))
+
 	// Broadcast the list of online users after a new connection is added
 	s.broadcastOnlineUsers(userID)
 

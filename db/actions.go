@@ -444,3 +444,22 @@ func GetCommentLikesAndDislikesCount(db *sql.DB, commentID string) (int, int) {
 	}
 	return likes, dislikes
 }
+
+func SaveMessage(db *sql.DB, content string, receiverID int, fromUserID int) error {
+    // Prepare the SQL statement for inserting the message into the database
+    query := `
+        INSERT INTO messages (from_user_id, to_user_id, content, created_at, is_read)
+        VALUES (?, ?, ?, ?, ?)
+    `
+    
+    // Set the current time as the created_at value
+    createdAt := time.Now()
+
+    // Execute the query with the given parameters
+    _, err := db.Exec(query, fromUserID, receiverID, content, createdAt, false)
+    if err != nil {
+        return err
+    }
+
+    return nil
+}
