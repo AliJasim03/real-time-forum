@@ -1,3 +1,4 @@
+import { isLoggedIn } from './app.js';
 import { updateOnlineUserList } from './templates/user-list.js';
 
 let socket;
@@ -22,7 +23,6 @@ export function setupWebSocket() {
                 localStorage.setItem('currID', data.userID);
                 break;
             case 'onlineUsers':
-                debugger;
                 updateOnlineUserList(data.users);
                 break;
             case 'chat':
@@ -49,27 +49,6 @@ export function setupWebSocket() {
     };
 }
 
-
-
-async function checkAuth() {
-    fetch('/api/checkAuth', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    }).then(response => {
-        if (!response.ok) {
-            return response.text().then(text => { throw new Error(text) });
-        }
-        return response.json();
-    }).then(response => {
-        isLoggedIn = response.isAuth;
-        updateNavbar(isLoggedIn);
-    }).catch(error => {
-        showError(error);
-    });
-}
-
 function getCurrentUserID() {
     return localStorage.getItem('currID');
 }
@@ -77,7 +56,7 @@ function getCurrentUserID() {
 // Function to send a message to the server
 function handleChatMessage(message) {
     try {
-        if (typeof message === 'object'){
+        if (typeof message === 'object') {
             displayNewMessage(message.from, message.content);
         } else {
             console.error("Invalid message format:", message);
@@ -119,38 +98,3 @@ function createMessageElement(message) {
 
     return messageDiv;
 }
-
-// Update the list of online users in the DOM
-function updateOnlineUserList(users) {
-    const userList = document.querySelector('.list-group');
-    userList.innerHTML = '';
-
-    if (!checkAuth()) {
-        userList.style.display = 'none';
-        return;
-    } else {
-        userList.style.display = 'block';
-    }
-
-    users.forEach(user => {
-        const userItem = document.createElement('li');
-        userItem.className = 'list-group-item';
-
-        const userLink = document.createElement('a');
-        userLink.href = `/chat?user=${user.ID}`;
-        userLink.className = 'd-flex justify-content-between align-items-center';
-        userLink.textContent = user.Username;
-
-        const statusBadge = document.createElement('span');
-        statusBadge.className = user.IsOnline ? 'badge bg-success' : 'badge bg-secondary';
-        statusBadge.textContent = user.IsOnline ? 'Online' : 'Offline';
-
-        userLink.appendChild(statusBadge);
-        userItem.appendChild(userLink);
-        userList.appendChild(userItem);
-    });
-}
-
-$(document).ready(function () {
-    setupWebSocket(); // Call the function to set up the WebSocket connection
-});
