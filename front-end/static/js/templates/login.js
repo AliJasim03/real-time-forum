@@ -1,4 +1,11 @@
-export function loginPage() {
+import { loginAction, checkAuth, updateView, isLoggedIn } from '../app.js';
+
+export async function loginPage() {
+    if (isLoggedIn) {
+        history.pushState(null, null, '/');
+        updateView('/');
+        return;
+    }
     const app = $('#app');
     app.html(`
         <script src="front-end/static/js/scripts.js"></script>
@@ -6,6 +13,7 @@ export function loginPage() {
             <div class="row justify-content-center">
                 <div class="col-md-6">
                     <h2 class="text-center mt-5 mb-4">Login</h2>
+                    <div class="alert alert-success d-none" id="success"></div>
                     <div class="alert alert-danger d-none" id="error"></div>
                     <div class="form-group mb-3">
                         <label for="email">Email address</label>
@@ -31,40 +39,4 @@ export function loginPage() {
         $('#error').addClass('d-none');
     });
 
-}
-
-export function loginAction() {
-    const email = $('#email').val();
-    const password = $('#password').val();
-
-    // Check if the email and password are empty or contain only spaces
-    if (email.trim() === "" || password.trim() === "") {
-        showError("Email and Password are required");
-        return;
-    }
-
-    const data = JSON.stringify({
-        email: email,
-        password: password
-    });
-
-    fetch('/api/loginAction', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: data
-    })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => { throw new Error(text) });
-            }
-            // Handle successful login
-            //show login success message
-            showSuccess("Login successful");
-            window.location.href = '/'; // Redirect to the home page or dashboard
-        })
-        .catch(error => {
-            showError(error.message);
-        });
 }
