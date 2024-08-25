@@ -25,9 +25,12 @@ function sendMessage() {
     console.log("it work in front");
     const message = $('#message-input').val();
     if (message.trim() !== '') {
+        console.log(message);
+        debugger;
         const chatMessage = { type: 'chat', to: userID, message: message };
         socket.send(JSON.stringify(chatMessage));
-        $('#message-input').val('');
+        console.log(chatMessage);
+        $('#message-input').val('');``
     }
 }
 

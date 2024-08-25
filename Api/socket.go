@@ -44,11 +44,15 @@ func makeSocketManager() *socketsManager {
 
 func (s *server) handleMessages(conn *websocket.Conn, userID uint64) {
     for {
+        log.Println("Waiting for message...")
+        
         _, message, err := conn.ReadMessage()
         if err != nil {
             log.Printf("Error reading message: %v", err)
             break
         }
+
+        log.Printf("Received message: %s", message)
 
         var chatMessage struct {
             Type    string `json:"type"`
@@ -60,6 +64,9 @@ func (s *server) handleMessages(conn *websocket.Conn, userID uint64) {
             continue
         }
 
+        log.Printf("Parsed message: %+v", chatMessage)
+
+        
         toUserID, err := strconv.Atoi(chatMessage.To)
         if err != nil {
             log.Printf("Error converting 'to' to integer: %v", err)
@@ -72,12 +79,19 @@ func (s *server) handleMessages(conn *websocket.Conn, userID uint64) {
             continue
         }
 
-        log.Println("Message handled successfully")
+        log.Println("Message saved successfully")
 
-        // TODO: Implement message forwarding
-         s.forwardMessage(chatMessage, userID)
+
+        s.forwardMessage(chatMessage, userID)
+        log.Println("Message forwarded, ready for the next message.")
     }
+
+    log.Println("Connection closed or error occurred, exiting message handling loop.")
 }
+
+
+
+
 
 func (e *socketsManager) addConnection(conn *websocket.Conn, username string) uint64 {
     connectionId := e.socketCounter.Add(1)

@@ -35,7 +35,7 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 	go s.handleMessages(conn, uint64(userID))
 
 	// Broadcast the list of online users after a new connection is added
-	s.broadcastOnlineUsers(userID)
+	 s.broadcastOnlineUsers(userID)
 
 	for {
 		_, _, err := conn.ReadMessage()
@@ -45,27 +45,39 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// Broadcast the list of online users after a connection is removed
-}
 
+}
 func (s *server) forwardMessage(chatMessage struct {
     Type    string `json:"type"`
     To      string `json:"to"`
     Message string `json:"message"`
 }, fromUserID uint64) {
-    toUserID, err := strconv.Atoi(chatMessage.To)
-    if err != nil {
-        log.Printf("Error converting 'to' to integer: %v", err)
-        return
+    s.eventManager.lock.Lock()
+    defer s.eventManager.lock.Unlock()
+
+    var recipientFound bool
+    for _, socket := range s.eventManager.sockets {
+        if socket.username == chatMessage.To {
+            recipientFound = true
+            err := socket.connection.WriteJSON(map[string]interface{}{
+                "type":    "chat",
+                "message": chatMessage.Message,
+                "from":    strconv.Itoa(int(fromUserID)),
+            })
+            if err != nil {
+                log.Printf("Error forwarding message to user %s: %v", chatMessage.To, err)
+            } else {
+                log.Printf("Message successfully forwarded to user %s: %s", chatMessage.To, chatMessage.Message)
+            }
+            break
+        }
     }
 
-    messageData := map[string]interface{}{
-        "type":    "chat",
-        "from":    fromUserID,
-        "message": chatMessage.Message,
+    if !recipientFound {
+        log.Printf("Recipient user %s not found or not connected", chatMessage.To)
     }
-
-    s.sendEventToUser(messageData, toUserID)
 }
+
 
 
 func (s *server) broadcastOnlineUsers(userID int) {
@@ -138,6 +150,6 @@ func (s *server) SendPings() {
 		s.sendEvents(event)
 
 		event.Count++
-		time.Sleep(1 * time.Second)
+		time.Sleep(10 * time.Second)
 	}
 }
