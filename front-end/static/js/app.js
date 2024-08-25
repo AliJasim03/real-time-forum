@@ -9,7 +9,7 @@ const routes = {
     '/liked-posts': Templates.Index.likedPostsPage,
     '/new-post': Templates.createPost.createPostPage,
     '/post': Templates.postDetails.postPage,
-    '/chat': Templates.chat.chatPageupdateView
+    '/chat': Templates.chat.chatPage
 };
 
 // Check login status
