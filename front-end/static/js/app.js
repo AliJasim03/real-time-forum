@@ -1,5 +1,5 @@
 import * as Templates from './templates/export.js';
-
+import { setupWebSocket } from './socket.js';
 // Define routes
 const routes = {
     '/': Templates.Index.homePage,
@@ -9,31 +9,17 @@ const routes = {
     '/liked-posts': Templates.Index.likedPostsPage,
     '/new-post': Templates.createPost.createPostPage,
     '/post': Templates.postDetails.postPage,
-    '/chat': Templates.chat.chatPage
+    '/chat': Templates.chat.chatPageupdateView
 };
 
 // Check login status
-export var isLoggedIn = await checkAuth(); // This should be replaced with actual login status check
+export let isLoggedIn = false;
 
 // Handle browser back and forward buttons
 window.onpopstate = () => {
     updateView(window.location.pathname);
 };
 
-$(document).ready(async function () {
-    // Attach event listeners to navigation links
-    $('#home-link').on('click', () => navigate('/'));
-    $('#login-link').on('click', () => navigate('/login'));
-    $('#register-link').on('click', () => navigate('/register'));
-    $('#my-posts-link').on('click', () => navigate('/my-posts'));
-    $('#liked-posts-link').on('click', () => navigate('/liked-posts'));
-    $('#new-post-link').on('click', () => navigate('/new-post'));
-    $('#logout-link').on('click', async () => await logout());
-
-    // Initialize the view
-    updateView(window.location.pathname);
-
-});
 
 // Handle navigation
 export async function navigate(path) {
@@ -41,8 +27,9 @@ export async function navigate(path) {
     updateView(path);
 }
 
+
 // Update the view based on the current path
-function updateView(path) {
+export function updateView(path) {
     const view = routes[path];
     if (view) {
         view();
@@ -56,28 +43,28 @@ export function updateNavbar(isLoggedIn) {
         $('#register-link-container').addClass('d-none');
         $('#login-link-container').addClass('d-none');
 
+        $('#home-link').removeClass('d-none');
         $('#my-posts-link-container').removeClass('d-none');
         $('#liked-posts-link-container').removeClass('d-none');
         $('#new-post-link-container').removeClass('d-none');
         $('#logout-link-container').removeClass('d-none');
 
     } else {
-
         $('#register-link-container').removeClass('d-none');
         $('#login-link-container').removeClass('d-none');
 
+        $('#home-link').addClass('d-none');
         $('#my-posts-link-container').addClass('d-none');
         $('#liked-posts-link-container').addClass('d-none');
         $('#new-post-link-container').addClass('d-none');
         $('#logout-link-container').addClass('d-none');
-
     }
 }
 
 
 //would be better if these were in a separate file auth.js
-async function checkAuth() {
-    fetch('/api/checkAuth', {
+export async function checkAuth() {
+    await fetch('/api/checkAuth', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -86,10 +73,11 @@ async function checkAuth() {
         if (!response.ok) {
             return response.text().then(text => { throw new Error(text) });
         }
-        return response.json();
-    }).then(response => {
-        isLoggedIn = response.isAuth;
+        return response.json(); // Parse the response as JSON
+    }).then(data => {
+        isLoggedIn = data.isAuth;
         updateNavbar(isLoggedIn);
+        return isLoggedIn;
     }).catch(error => {
         showError(error);
     });
@@ -124,12 +112,13 @@ export function loginAction() {
             }
             // Handle successful login
             //show login success message
-            debugger;
             showSuccess("Login successful");
-            debugger;
             setTimeout(() => {
-                history.pushState(null, null, '/');
-                updateView('/');
+                //show the user list
+                $('#user-col').removeClass('d-none');
+                setupWebSocket(); // Call the function to set up the WebSocket connection
+                navigate('/'); // Redirect to the home page
+                updateNavbar(true);
             }, 2000);
         })
         .catch(error => {
@@ -150,13 +139,38 @@ async function logout() {
         //show logout success message
         showSuccess("Logout successful");
         isLoggedIn = false;
-        navigate('/');
-        updateNavbar(isLoggedIn);
-        // hide the user list
         $('#user-col').addClass('d-none');
+        navigate('/login');
+        Templates.Login.loginPage();
+        updateNavbar(false);
+        // hide the user list
     }).catch(error => {
         showError(error.message);
     });
 
 }
 
+
+
+$(document).ready(async function () {
+    // Attach event listeners to navigation links
+    $('#home-link').on('click', () => navigate('/'));
+    $('#login-link').on('click', () => navigate('/login'));
+    $('#register-link').on('click', () => navigate('/register'));
+    $('#my-posts-link').on('click', () => navigate('/my-posts'));
+    $('#liked-posts-link').on('click', () => navigate('/liked-posts'));
+    $('#new-post-link').on('click', () => navigate('/new-post'));
+    $('#logout-link').on('click', async () => await logout());
+
+    await checkAuth();
+    if (isLoggedIn) {
+        // Initialize the view
+        updateView(window.location.pathname);
+        setupWebSocket(); // Call the function to set up the WebSocket connection
+
+    } else {
+        // redirect to login page
+        history.pushState(null, null, '/login');
+        updateView('/login');
+    }
+});

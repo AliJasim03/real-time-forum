@@ -1,6 +1,11 @@
-import { loginAction } from '../app.js';
+import { loginAction, checkAuth, updateView, isLoggedIn } from '../app.js';
 
-export function loginPage() {
+export async function loginPage() {
+    if (isLoggedIn) {
+        history.pushState(null, null, '/');
+        updateView('/');
+        return;
+    }
     const app = $('#app');
     app.html(`
         <script src="front-end/static/js/scripts.js"></script>

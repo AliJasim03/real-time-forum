@@ -76,7 +76,6 @@ export async function homePage() {
 }
 
 export async function myPostsPage() {
-    debugger;
     const app = $('#app');
     app.html(index);
     await loadCategories();
@@ -84,7 +83,6 @@ export async function myPostsPage() {
 }
 
 export async function likedPostsPage() {
-    debugger;
     const app = $('#app');
     app.html(index);
     await loadCategories();

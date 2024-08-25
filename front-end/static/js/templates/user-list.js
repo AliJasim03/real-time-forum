@@ -1,21 +1,17 @@
-import { isLoggedIn } from '../app.js';
+import { checkAuth } from '../app.js';
 
 // Update the list of online users in the DOM
 export function updateOnlineUserList(users) {
-    debugger;
-
     const userCol = $('#user-col');
+    if (!checkAuth()) {
+
+        userCol.addClass('d-none');
+        return;
+    }
     userCol.removeClass('d-none');
 
     const userList = $('#user-list');
     userList.html('');
-
-    if (!isLoggedIn) {
-        userCol.addClass('d-none');
-        return;
-    } else {
-        userCol.removeClass('d-none');
-    }
 
     users.forEach(user => {
         const userItem = document.createElement('li');

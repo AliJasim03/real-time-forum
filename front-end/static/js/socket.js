@@ -2,7 +2,7 @@ import { updateOnlineUserList } from './templates/user-list.js';
 
 let socket;
 
-function setupWebSocket() {
+export function setupWebSocket() {
     socket = new WebSocket('ws://localhost:8080/events');
 
     // Handle when the WebSocket connection is opened
@@ -20,7 +20,9 @@ function setupWebSocket() {
         switch (data.type) {
             case 'initialConnection':
                 localStorage.setItem('currID', data.userID);
+                break;
             case 'onlineUsers':
+                debugger;
                 updateOnlineUserList(data.users);
                 break;
             case 'chat':
@@ -89,10 +91,5 @@ function createMessageElement(message) {
     return messageDiv;
 }
 
-
-
-$(document).ready(function () {
-    setupWebSocket(); // Call the function to set up the WebSocket connection
-});
 
 
