@@ -1,3 +1,4 @@
+import { socket } from '../socket.js';
 export function chatPage(userID) {
     const app = $('#app');
     app.html(`
@@ -30,7 +31,7 @@ function sendMessage() {
         const chatMessage = { type: 'chat', to: userID, message: message };
         socket.send(JSON.stringify(chatMessage));
         console.log(chatMessage);
-        $('#message-input').val('');``
+        $('#message-input').val(''); ``
     }
 }
 

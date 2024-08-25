@@ -167,7 +167,7 @@ $(document).ready(async function () {
         // Initialize the view
         updateView(window.location.pathname);
         setupWebSocket(); // Call the function to set up the WebSocket connection
-
+        $('#user-col').removeClass('d-none');
     } else {
         // redirect to login page
         history.pushState(null, null, '/login');
