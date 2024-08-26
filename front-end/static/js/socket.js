@@ -1,7 +1,6 @@
-import { isLoggedIn } from './app.js';
 import { updateOnlineUserList } from './templates/user-list.js';
 
-let socket;
+export let socket;
 
 export function setupWebSocket() {
     socket = new WebSocket('ws://localhost:8080/events');
