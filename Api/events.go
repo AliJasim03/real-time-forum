@@ -30,55 +30,53 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 	username := strconv.Itoa(userID)
 
 	connectionId := s.eventManager.addConnection(conn, username)
-	defer s.removeConnection(connectionId, userID)
-
-	go s.handleMessages(conn, uint64(userID))
 
 	// Broadcast the list of online users after a new connection is added
-	 s.broadcastOnlineUsers(userID)
+	s.broadcastOnlineUsers(userID)
 
-	for {
-		_, _, err := conn.ReadMessage()
-		if err != nil {
-			log.Println(err)
+	// inside it infinite loop to handle messages and keep connection alive
+	s.handleMessages(conn, userID, connectionId)
+
+	// Broadcast the list of online users after a connection is removed
+	log.Println("Broadcast the list of online users after connection removal.")
+	s.removeConnection(connectionId)
+	s.broadcastOnlineUsers(userID)
+}
+
+func (s *server) forwardMessage(chatMessage ChatMessage, fromUserID int,
+) {
+	s.eventManager.lock.Lock()
+
+	log.Printf("Attempting to forward message to user %s from user %d", chatMessage.To, fromUserID)
+
+	var recipientFound bool
+	for _, socket := range s.eventManager.sockets {
+		log.Printf("Checking socket for user %s", socket.username)
+		if socket.username == chatMessage.To {
+			recipientFound = true
+
+			message := messageSent{
+				Type:    "chat",
+				From:    strconv.Itoa(fromUserID),
+				Message: chatMessage.Message,
+			}
+
+			err := socket.connection.WriteJSON(message)
+			if err != nil {
+				log.Printf("Error forwarding message to user %s: %v", chatMessage.To, err)
+			} else {
+				log.Printf("Message successfully forwarded to user %s: %s", chatMessage.To, chatMessage.Message)
+			}
 			break
 		}
 	}
-	// Broadcast the list of online users after a connection is removed
 
+	if !recipientFound {
+		log.Printf("Recipient user %s not found or not connected", chatMessage.To)
+	}
+
+	s.eventManager.lock.Unlock()
 }
-func (s *server) forwardMessage(chatMessage struct {
-    Type    string `json:"type"`
-    To      string `json:"to"`
-    Message string `json:"message"`
-}, fromUserID uint64) {
-    s.eventManager.lock.Lock()
-    defer s.eventManager.lock.Unlock()
-
-    var recipientFound bool
-    for _, socket := range s.eventManager.sockets {
-        if socket.username == chatMessage.To {
-            recipientFound = true
-            err := socket.connection.WriteJSON(map[string]interface{}{
-                "type":    "chat",
-                "message": chatMessage.Message,
-                "from":    strconv.Itoa(int(fromUserID)),
-            })
-            if err != nil {
-                log.Printf("Error forwarding message to user %s: %v", chatMessage.To, err)
-            } else {
-                log.Printf("Message successfully forwarded to user %s: %s", chatMessage.To, chatMessage.Message)
-            }
-            break
-        }
-    }
-
-    if !recipientFound {
-        log.Printf("Recipient user %s not found or not connected", chatMessage.To)
-    }
-}
-
-
 
 func (s *server) broadcastOnlineUsers(userID int) {
 	onlineUsers := s.getOnlineUsers(userID)
