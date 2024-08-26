@@ -55,7 +55,7 @@ function getCurrentUserID() {
 // Function to send a message to the server
 function handleChatMessage(message) {
     try {
-        if (typeof message === 'object') {
+        if (message !== null && typeof message === 'object') {
             displayNewMessage(message.from, message.content);
         } else {
             console.error("Invalid message format:", message);

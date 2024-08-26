@@ -1,4 +1,4 @@
-import { checkAuth } from '../app.js';
+import { checkAuth, navigate } from '../app.js';
 
 // Update the list of online users in the DOM
 export function updateOnlineUserList(users) {
@@ -18,7 +18,7 @@ export function updateOnlineUserList(users) {
         userItem.className = 'list-group-item';
 
         const userLink = document.createElement('a');
-        userLink.href = `/chat?user=${user.ID}`;
+        userLink.onclick = () => navigate(`/chat?user=${user.ID}`);
         userLink.className = 'd-flex justify-content-between align-items-center';
         userLink.textContent = user.Username;
 

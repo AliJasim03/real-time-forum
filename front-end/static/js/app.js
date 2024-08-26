@@ -30,6 +30,8 @@ export async function navigate(path) {
 
 // Update the view based on the current path
 export function updateView(path) {
+    //remove all the optional query parameters
+    path = path.split('?')[0];
     const view = routes[path];
     if (view) {
         view();
@@ -155,6 +157,7 @@ async function logout() {
 $(document).ready(async function () {
     // Attach event listeners to navigation links
     $('#home-link').on('click', () => navigate('/'));
+    $('#forum-link').on('click', () => navigate('/'));
     $('#login-link').on('click', () => navigate('/login'));
     $('#register-link').on('click', () => navigate('/register'));
     $('#my-posts-link').on('click', () => navigate('/my-posts'));
