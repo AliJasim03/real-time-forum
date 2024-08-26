@@ -103,20 +103,6 @@ func (e *socketsManager) addConnection(conn *websocket.Conn, username string) ui
 	e.lock.Lock()
 	defer e.lock.Unlock()
 
-	// Check if the user is already connected and remove the old connection
-	for connectionId, socket := range e.sockets {
-		if socket.username == username && !socket.closed.Load() {
-			log.Printf("User %s is already connected with connection ID %d, removing old connection.", username, connectionId)
-			socket.closed.Store(true)
-			delete(e.sockets, connectionId)
-			if err := socket.connection.Close(); err != nil {
-				log.Printf("Error closing old WebSocket connection: %v", err)
-			}
-		}
-	}
-
-	connectionId := e.socketCounter.Add(1)
-
 	e.sockets[connectionId] = userSocket{
 		connection: conn,
 		username:   username,
