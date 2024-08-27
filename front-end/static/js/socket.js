@@ -53,13 +53,12 @@ function getCurrentUserID() {
 }
 
 // Function to send a message to the server
-function handleChatMessage(message) {
+function handleChatMessage(data) {
     try {
-        if (message !== null && typeof message === 'object') {
-            // Ensure you're accessing the correct fields based on your Go server's output
-            displayNewMessage(message.from, message.message); // Or whatever fields your Go server sends
+        if (data !== null && typeof data === 'object') {
+            displayNewMessage(data.from, data.message); 
         } else {
-            console.error("Invalid message format:", message);
+            console.error("Invalid message format:", data);
         }
     } catch (error) {
         console.error("Error handling chat message:", error);
