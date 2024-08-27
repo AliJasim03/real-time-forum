@@ -56,7 +56,7 @@ function getCurrentUserID() {
 function handleChatMessage(data) {
     try {
         if (data !== null && typeof data === 'object') {
-            displayNewMessage(data.from, data.message); 
+            displayNewMessage(data.from, data.message, data.Username); 
         } else {
             console.error("Invalid message format:", data);
         }
@@ -70,7 +70,7 @@ function displayNewMessage(fromUserID, content) {
     console.log("Displaying message from:", fromUserID);
     const chatContainer = document.getElementById('chat-messages');
     const messageElement = createMessageElement({
-        FromUserID: fromUserID,
+        FromUserID: 'HIM',
         Content: content,
         CreatedAt: new Date().toISOString()
     });
@@ -79,20 +79,27 @@ function displayNewMessage(fromUserID, content) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-function createMessageElement(message) {
+function createMessageElement({ FromUserID, Content, CreatedAt }) {
     const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message');
-    messageDiv.classList.add(message.FromUserID === getCurrentUserID() ? 'sent' : 'received');
+    messageDiv.classList.add('message', 'border', 'rounded', 'p-2', 'text-end'); // Add 'text-end' class for right alignment
+
+    const userIDDiv = document.createElement('div');
+    userIDDiv.classList.add('fw-bold', 'text-success');
+    userIDDiv.textContent = `From: ${FromUserID}`;
+    messageDiv.appendChild(userIDDiv);
 
     const contentP = document.createElement('p');
-    contentP.textContent = message.Content;
+    contentP.classList.add('mb-1');
+    contentP.textContent = Content;
+    messageDiv.appendChild(contentP);
 
     const timeSpan = document.createElement('span');
-    timeSpan.classList.add('message-time');
-    timeSpan.textContent = new Date(message.CreatedAt).toLocaleTimeString();
-
-    messageDiv.appendChild(contentP);
+    timeSpan.classList.add('message-time', 'small', 'text-muted');
+    timeSpan.textContent = new Date(CreatedAt).toLocaleTimeString();
     messageDiv.appendChild(timeSpan);
 
     return messageDiv;
 }
+
+
+
