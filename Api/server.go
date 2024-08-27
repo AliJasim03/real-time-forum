@@ -24,7 +24,7 @@ func New(db *sql.DB) *server {
 }
 
 func (s *server) Init() {
-	go s.SendPings() // for testing websockets
+	// go s.SendPings() // for testing websockets
 	// Serve static files (CSS, JavaScript, etc.)
 	s.mux.Handle("/front-end/static/", http.StripPrefix("/front-end/static/", http.FileServer(http.Dir("./front-end/static"))))
 

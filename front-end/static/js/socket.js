@@ -25,7 +25,7 @@ export function setupWebSocket() {
                 updateOnlineUserList(data.users);
                 break;
             case 'chat':
-                handleChatMessage(data.message);
+                handleChatMessage(data); 
                 break;
             default:
                 console.log('Unknown message type:', data.type);
@@ -56,7 +56,8 @@ function getCurrentUserID() {
 function handleChatMessage(message) {
     try {
         if (message !== null && typeof message === 'object') {
-            displayNewMessage(message.from, message.content);
+            // Ensure you're accessing the correct fields based on your Go server's output
+            displayNewMessage(message.from, message.message); // Or whatever fields your Go server sends
         } else {
             console.error("Invalid message format:", message);
         }
@@ -64,7 +65,6 @@ function handleChatMessage(message) {
         console.error("Error handling chat message:", error);
     }
 }
-
 
 
 function displayNewMessage(fromUserID, content) {

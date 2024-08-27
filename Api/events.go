@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"time"
+	// "time"
 )
 
 func (s *server) indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -133,7 +133,7 @@ func (s *server) sendEvents(data interface{}) {
 // 	s.sendToAll(data)
 // }
 
-type pingEvent struct {
+/*type pingEvent struct {
 	EventType string `json:"type"` // ping
 	Count     int    `json:"count"`
 }
@@ -150,4 +150,4 @@ func (s *server) SendPings() {
 		event.Count++
 		time.Sleep(10 * time.Second)
 	}
-}
+}*/
