@@ -153,11 +153,11 @@ func (s *server) removeConnection(connectionId uint64) {
 	}
 }
 
-func (s *server) getOnlineUsers(userID int) []User {
+func (s *server) getOnlineUsers() []User {
 	s.eventManager.lock.Lock()
 	defer s.eventManager.lock.Unlock()
 
-	rows, err := s.db.Query("SELECT username, id FROM users WHERE id != ? ORDER BY id", userID)
+	rows, err := s.db.Query("SELECT username, id FROM users ORDER BY id")
 	if err != nil {
 		log.Printf("Error querying users: %v", err)
 		return nil
