@@ -27,6 +27,9 @@ export function setupWebSocket() {
             case 'chat':
                 handleChatMessage(data); 
                 break;
+            case 'chatOpen':
+                loadOldMessages();
+                break;
             default:
                 console.log('Unknown message type:', data.type);
         }
@@ -48,8 +51,12 @@ export function setupWebSocket() {
     };
 }
 
-function getCurrentUserID() {
+export function getCurrentUserID() {
     return localStorage.getItem('currID');
+}
+
+function loadOldMessages(){
+    
 }
 
 // Function to send a message to the server

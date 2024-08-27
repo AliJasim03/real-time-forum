@@ -34,8 +34,11 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 	// Broadcast the list of online users after a new connection is added
 	s.broadcastOnlineUsers()
 
+	// s.LastMesssge(conn)
+
 	// inside it infinite loop to handle messages and keep connection alive
 	s.handleMessages(conn, userID, connectionId)
+
 
 	// Broadcast the list of online users after a connection is removed
 	log.Println("Broadcast the list of online users after connection removal.")

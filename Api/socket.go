@@ -48,12 +48,58 @@ type messageSent struct {
 	Message string `json:"message"`
 }
 
+
+type Load struct {
+	Type string `json:"type"`
+	userID1 int    `json:"userID1"`
+	userID2 int    `json:"userID2"`
+	Content string `json:"message"`
+}
+
+
 func makeSocketManager() *socketsManager {
 	return &socketsManager{
 		socketCounter: atomic.Uint64{},
 		sockets:       make(map[uint64]userSocket),
 	}
 }
+
+
+
+/*func (s *server) LastMessage(conn *websocket.Conn) {
+	_, message, err := conn.ReadMessage()
+	if err != nil {
+		log.Printf("Error reading WebSocket message: %v", err)
+		return
+	}
+
+	var load Load
+	if err := json.Unmarshal(message, &load); err != nil {
+		log.Printf("Error unmarshaling message: %v", err)
+		return
+	}
+
+	userID1 := load.userID1
+	userID2 := load.userID2
+
+	messages, err := backend.GetLastMessages(s.db, userID1, userID2, 10)
+	if err != nil {
+		log.Printf("Error fetching last messages: %v", err)
+		return
+	}
+
+	response := LastMessagesResponse{
+		Type:     "lastMessages",
+		Message: messages,
+	}
+
+	if err := conn.WriteJSON(response); err != nil {
+		log.Printf("Error sending last messages: %v", err)
+	}
+}
+*/
+
+
 
 func (s *server) handleMessages(conn *websocket.Conn, userID int, connectionId uint64) {
 	for {
@@ -156,7 +202,6 @@ func (s *server) removeConnection(connectionId uint64) {
 func (s *server) getOnlineUsers() []User {
 	s.eventManager.lock.Lock()
 	defer s.eventManager.lock.Unlock()
-
 	rows, err := s.db.Query("SELECT username, id FROM users ORDER BY id")
 	if err != nil {
 		log.Printf("Error querying users: %v", err)

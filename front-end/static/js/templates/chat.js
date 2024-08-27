@@ -16,8 +16,22 @@ export function chatPage() {
         </div>
     `);
 
+    // openChat();
+
     $('#send-message').on('click', () => sendMessage());
 }
+
+/*function openChat(){
+    const userID = window.location.href.split('?')[1].split('=')[1];
+
+    if (userID === getCurrentUserID()) {
+        console.error('You cannot chat with yourself');
+        return;
+    }
+
+    const opener = { type: 'chatOpen',userID1: userID, userID2: getCurrentUserID() ,message: 'open' };
+    socket.send(JSON.stringify(opener));
+}*/
 
 function sendMessage() {
     const userID = window.location.href.split('?')[1].split('=')[1];
