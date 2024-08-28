@@ -46,8 +46,7 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 	s.broadcastOnlineUsers(userID)
 }
 
-func (s *server) forwardMessage(chatMessage ChatMessage, fromUserID int,
-) {
+func (s *server) forwardMessage(chatMessage ChatMessage, fromUserID int) {
 	s.eventManager.lock.Lock()
 
 	log.Printf("Attempting to forward message to user %s from user %d", chatMessage.To, fromUserID)
@@ -79,6 +78,9 @@ func (s *server) forwardMessage(chatMessage ChatMessage, fromUserID int,
 	}
 
 	s.eventManager.lock.Unlock()
+
+	// Broadcast the online users to the sender after forwarding the message
+	s.broadcastOnlineUsers(fromUserID)
 }
 
 func (s *server) broadcastOnlineUsers(userID int) {
