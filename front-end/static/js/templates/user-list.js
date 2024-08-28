@@ -4,7 +4,6 @@ import { checkAuth, navigate } from '../app.js';
 export function updateOnlineUserList(users) {
     const userCol = $('#user-col');
     if (!checkAuth()) {
-
         userCol.addClass('d-none');
         return;
     }
@@ -31,3 +30,4 @@ export function updateOnlineUserList(users) {
         userList.append(userItem);
     });
 }
+

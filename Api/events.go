@@ -32,7 +32,7 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 	connectionId := s.eventManager.addConnection(conn, username)
 
 	// Broadcast the list of online users after a new connection is added
-	s.broadcastOnlineUsers()
+	s.broadcastOnlineUsers(userID)
 
 	// s.LastMesssge(conn)
 
@@ -43,7 +43,7 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 	// Broadcast the list of online users after a connection is removed
 	log.Println("Broadcast the list of online users after connection removal.")
 	s.removeConnection(connectionId)
-	s.broadcastOnlineUsers()
+	s.broadcastOnlineUsers(userID)
 }
 
 func (s *server) forwardMessage(chatMessage ChatMessage, fromUserID int,
@@ -81,8 +81,8 @@ func (s *server) forwardMessage(chatMessage ChatMessage, fromUserID int,
 	s.eventManager.lock.Unlock()
 }
 
-func (s *server) broadcastOnlineUsers() {
-	onlineUsers := s.getOnlineUsers()
+func (s *server) broadcastOnlineUsers(userID int) {
+	onlineUsers := s.getOnlineUsers(userID)
 	data := map[string]interface{}{
 		"type":  "onlineUsers",
 		"users": onlineUsers,

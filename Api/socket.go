@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"time"
 	// "fmt"
 	"log"
 	"strconv"
@@ -29,6 +30,7 @@ type User struct {
 	Username string
 	ID       int
 	IsOnline bool
+    LastMessageTime time.Time  
 }
 
 var upgrader = websocket.Upgrader{
@@ -199,33 +201,52 @@ func (s *server) removeConnection(connectionId uint64) {
 	}
 }
 
-func (s *server) getOnlineUsers() []User {
-	s.eventManager.lock.Lock()
-	defer s.eventManager.lock.Unlock()
-	rows, err := s.db.Query("SELECT username, id FROM users ORDER BY id")
-	if err != nil {
-		log.Printf("Error querying users: %v", err)
-		return nil
-	}
-	defer rows.Close()
+func (s *server) getOnlineUsers(currentUserID int) []User {
+    s.eventManager.lock.Lock()
+    defer s.eventManager.lock.Unlock()
+    query := `
+        SELECT u.username, u.id
+        FROM users u
+        LEFT JOIN (
+            SELECT u1.id AS user_id, MAX(m.created_at) AS last_interaction
+            FROM users u1
+            JOIN messages m ON u1.id = m.from_user_id OR u1.id = m.to_user_id
+            WHERE m.from_user_id = ? OR m.to_user_id = ?
+            GROUP BY u1.id
+        ) recent_interactions ON u.id = recent_interactions.user_id
+        WHERE u.id != ?  
+		ORDER BY recent_interactions.last_interaction DESC, u.username ASC
+    `
+    
+    rows, err := s.db.Query(query, currentUserID, currentUserID, currentUserID)
+    if err != nil {
+        log.Printf("Error querying users: %v", err)
+        return nil
+    }
+    defer rows.Close()
 
-	var users []User
-	for rows.Next() {
-		var user User
-		if err := rows.Scan(&user.Username, &user.ID); err != nil {
-			log.Printf("Error scanning user: %v", err)
-			continue
-		}
-		users = append(users, user)
-	}
+    var users []User
+    for rows.Next() {
+        var user User
+        if err := rows.Scan(&user.Username, &user.ID); err != nil {
+            log.Printf("Error scanning user: %v", err)
+            continue
+        }
+        users = append(users, user)
+    }
 
-	for i := range users {
-		for _, socket := range s.eventManager.sockets {
-			if socket.username == strconv.Itoa(users[i].ID) {
-				users[i].IsOnline = true
-				break
-			}
-		}
-	}
-	return users
+    for i := range users {
+        for _, socket := range s.eventManager.sockets {
+            if socket.username == strconv.Itoa(users[i].ID) {
+                users[i].IsOnline = true
+                break
+            }
+        }
+    }
+    return users
 }
+
+
+
+
+
