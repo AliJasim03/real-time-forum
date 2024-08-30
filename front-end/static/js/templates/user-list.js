@@ -19,12 +19,16 @@ export function updateOnlineUserList(users) {
         const userLink = document.createElement('a');
         userLink.onclick = () => navigate(`/chat?user=${user.ID}`);
         userLink.className = 'd-flex justify-content-between align-items-center';
-        userLink.textContent = user.Username;
+
+        const username = document.createElement('span');
+        username.id = `user-link-${user.ID}`; // Add id property
+        username.textContent = user.Username;
 
         const statusBadge = document.createElement('span');
         statusBadge.className = user.IsOnline ? 'badge bg-success' : 'badge bg-secondary';
         statusBadge.textContent = user.IsOnline ? 'Online' : 'Offline';
 
+        userLink.appendChild(username);
         userLink.appendChild(statusBadge);
         userItem.appendChild(userLink);
         userList.append(userItem);

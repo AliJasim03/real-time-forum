@@ -5,7 +5,6 @@ import (
 	"time"
 	// "fmt"
 	"log"
-	"strconv"
 	"sync"
 	"sync/atomic"
 
@@ -22,15 +21,15 @@ type socketsManager struct {
 
 type userSocket struct {
 	connection *websocket.Conn
-	username   string
+	userId     int
 	closed     *atomic.Bool
 }
 
 type User struct {
-	Username string
-	ID       int
-	IsOnline bool
-    LastMessageTime time.Time  
+	Username        string
+	ID              int
+	IsOnline        bool
+	LastMessageTime time.Time
 }
 
 var upgrader = websocket.Upgrader{
@@ -40,24 +39,17 @@ var upgrader = websocket.Upgrader{
 
 type ChatMessage struct {
 	Type    string `json:"type"`
-	To      string `json:"to"`
+	From    int    `json:"from"`
+	To      int    `json:"to"`
 	Message string `json:"message"`
 }
-
-type messageSent struct {
-	Type    string `json:"type"`
-	From    string `json:"from"`
-	Message string `json:"message"`
-}
-
 
 type Load struct {
-	Type string `json:"type"`
+	Type    string `json:"type"`
 	userID1 int    `json:"userID1"`
 	userID2 int    `json:"userID2"`
 	Content string `json:"message"`
 }
-
 
 func makeSocketManager() *socketsManager {
 	return &socketsManager{
@@ -65,8 +57,6 @@ func makeSocketManager() *socketsManager {
 		sockets:       make(map[uint64]userSocket),
 	}
 }
-
-
 
 /*func (s *server) LastMessage(conn *websocket.Conn) {
 	_, message, err := conn.ReadMessage()
@@ -101,9 +91,7 @@ func makeSocketManager() *socketsManager {
 }
 */
 
-
-
-func (s *server) handleMessages(conn *websocket.Conn, userID int, connectionId uint64) {
+func (s *server) handleMessages(conn *websocket.Conn, userID int) {
 	for {
 		var chatMessage ChatMessage
 		log.Println("Waiting for message...")
@@ -124,13 +112,9 @@ func (s *server) handleMessages(conn *websocket.Conn, userID int, connectionId u
 
 		log.Printf("Parsed message: %+v", chatMessage)
 
-		toUserID, err := strconv.Atoi(chatMessage.To)
-		if err != nil {
-			log.Printf("Error converting 'to' to integer: %v", err)
-			continue
-		}
+		chatMessage.From = userID
 
-		err = backend.SaveMessage(s.db, chatMessage.Message, toUserID, userID)
+		err = backend.SaveMessage(s.db, chatMessage.Message, chatMessage.To, userID)
 		if err != nil {
 			log.Printf("Error saving message: %v", err)
 			continue
@@ -138,14 +122,14 @@ func (s *server) handleMessages(conn *websocket.Conn, userID int, connectionId u
 
 		log.Println("Message saved successfully")
 
-		s.forwardMessage(chatMessage, userID)
+		s.forwardMessage(chatMessage)
 		log.Println("Message forwarded, ready for the next message.")
 	}
 
 	log.Println("Connection closed or error occurred, exiting message handling loop.")
 }
 
-func (e *socketsManager) addConnection(conn *websocket.Conn, username string) uint64 {
+func (e *socketsManager) addConnection(conn *websocket.Conn, userId int) uint64 {
 	connectionId := e.socketCounter.Add(1)
 
 	e.lock.Lock()
@@ -153,35 +137,35 @@ func (e *socketsManager) addConnection(conn *websocket.Conn, username string) ui
 
 	e.sockets[connectionId] = userSocket{
 		connection: conn,
-		username:   username,
+		userId:     userId,
 		closed:     &atomic.Bool{},
 	}
 
 	// Send the user ID to the client
-	userID, _ := strconv.Atoi(username)
 	initialMessage := map[string]interface{}{
 		"type":   "initialConnection",
-		"userID": userID,
+		"userID": userId,
 	}
 	conn.WriteJSON(initialMessage)
 
-	log.Printf("User %s connected with connection ID %d", username, connectionId)
+	log.Printf("User %s connected with connection ID %d", userId, connectionId)
 	return connectionId
 }
 
-func (e *socketsManager) removeConnectionByUsername(username string) {
+func (s *server) removeConnectionByUserId(userId int) {
+	e := s.eventManager
 	e.lock.Lock()
 	defer e.lock.Unlock()
 
 	for connectionId, socket := range e.sockets {
-		if socket.username == username && !socket.closed.Load() {
+		if socket.userId == userId && !socket.closed.Load() {
 			socket.closed.Store(true)
 			delete(e.sockets, connectionId)
-			log.Printf("Connection ID %d removed for user %s", connectionId, username)
+			log.Printf("Connection ID %d removed for user %s", connectionId, userId)
 			return
 		}
 	}
-	log.Printf("No active connection found for user %s", username)
+	log.Printf("No active connection found for user %s", userId)
 }
 
 func (s *server) removeConnection(connectionId uint64) {
@@ -192,7 +176,7 @@ func (s *server) removeConnection(connectionId uint64) {
 	if socket, exists := e.sockets[connectionId]; exists && !socket.closed.Load() {
 		socket.closed.Store(true)
 		delete(e.sockets, connectionId)
-		log.Printf("Connection ID %d removed for user %s", connectionId, socket.username)
+		log.Printf("Connection ID %d removed for user %s", connectionId, socket.userId)
 		if err := socket.connection.Close(); err != nil {
 			log.Printf("Error closing WebSocket connection: %v", err)
 		}
@@ -202,9 +186,9 @@ func (s *server) removeConnection(connectionId uint64) {
 }
 
 func (s *server) getOnlineUsers(currentUserID int) []User {
-    s.eventManager.lock.Lock()
-    defer s.eventManager.lock.Unlock()
-    query := `
+	s.eventManager.lock.Lock()
+	defer s.eventManager.lock.Unlock()
+	query := `
         SELECT u.username, u.id
         FROM users u
         LEFT JOIN (
@@ -217,36 +201,31 @@ func (s *server) getOnlineUsers(currentUserID int) []User {
         WHERE u.id != ?  
 		ORDER BY recent_interactions.last_interaction DESC, u.username ASC
     `
-    
-    rows, err := s.db.Query(query, currentUserID, currentUserID, currentUserID)
-    if err != nil {
-        log.Printf("Error querying users: %v", err)
-        return nil
-    }
-    defer rows.Close()
 
-    var users []User
-    for rows.Next() {
-        var user User
-        if err := rows.Scan(&user.Username, &user.ID); err != nil {
-            log.Printf("Error scanning user: %v", err)
-            continue
-        }
-        users = append(users, user)
-    }
+	rows, err := s.db.Query(query, currentUserID, currentUserID, currentUserID)
+	if err != nil {
+		log.Printf("Error querying users: %v", err)
+		return nil
+	}
+	defer rows.Close()
 
-    for i := range users {
-        for _, socket := range s.eventManager.sockets {
-            if socket.username == strconv.Itoa(users[i].ID) {
-                users[i].IsOnline = true
-                break
-            }
-        }
-    }
-    return users
+	var users []User
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.Username, &user.ID); err != nil {
+			log.Printf("Error scanning user: %v", err)
+			continue
+		}
+		users = append(users, user)
+	}
+
+	for i := range users {
+		for _, socket := range s.eventManager.sockets {
+			if socket.userId == users[i].ID {
+				users[i].IsOnline = true
+				break
+			}
+		}
+	}
+	return users
 }
-
-
-
-
-

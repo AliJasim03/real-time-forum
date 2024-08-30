@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -198,7 +197,7 @@ func (s *server) logout(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	s.eventManager.removeConnectionByUsername(strconv.Itoa(userID))
+	s.removeConnectionByUserId(userID)
 
 	// put the empty cookie
 	http.SetCookie(res, emptyCookie)

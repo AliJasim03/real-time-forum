@@ -3,7 +3,6 @@ package api
 import (
 	"log"
 	"net/http"
-	"strconv"
 	// "time"
 )
 
@@ -27,9 +26,7 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	username := strconv.Itoa(userID)
-
-	connectionId := s.eventManager.addConnection(conn, username)
+	connectionId := s.eventManager.addConnection(conn, userID)
 
 	// Broadcast the list of online users after a new connection is added
 	s.broadcastOnlineUsers(userID)
@@ -37,8 +34,7 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 	// s.LastMesssge(conn)
 
 	// inside it infinite loop to handle messages and keep connection alive
-	s.handleMessages(conn, userID, connectionId)
-
+	s.handleMessages(conn, userID)
 
 	// Broadcast the list of online users after a connection is removed
 	log.Println("Broadcast the list of online users after connection removal.")
@@ -46,24 +42,17 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 	s.broadcastOnlineUsers(userID)
 }
 
-func (s *server) forwardMessage(chatMessage ChatMessage, fromUserID int) {
+func (s *server) forwardMessage(chatMessage ChatMessage) {
 	s.eventManager.lock.Lock()
 
-	log.Printf("Attempting to forward message to user %s from user %d", chatMessage.To, fromUserID)
+	log.Printf("Attempting to forward message to user %s from user %d", chatMessage.To, chatMessage.From)
 
 	var recipientFound bool
 	for _, socket := range s.eventManager.sockets {
-		log.Printf("Checking socket for user %s", socket.username)
-		if socket.username == chatMessage.To {
+		log.Printf("Checking socket for user %s", socket.userId)
+		if socket.userId == chatMessage.To {
 			recipientFound = true
-
-			message := messageSent{
-				Type:    "chat",
-				From:    strconv.Itoa(fromUserID),
-				Message: chatMessage.Message,
-			}
-
-			err := socket.connection.WriteJSON(message)
+			err := socket.connection.WriteJSON(chatMessage)
 			if err != nil {
 				log.Printf("Error forwarding message to user %s: %v", chatMessage.To, err)
 			} else {
@@ -78,9 +67,6 @@ func (s *server) forwardMessage(chatMessage ChatMessage, fromUserID int) {
 	}
 
 	s.eventManager.lock.Unlock()
-
-	// Broadcast the online users to the sender after forwarding the message
-	s.broadcastOnlineUsers(fromUserID)
 }
 
 func (s *server) broadcastOnlineUsers(userID int) {
@@ -97,7 +83,7 @@ func (s *server) sendEventToUser(data interface{}, userID int) {
 	defer s.eventManager.lock.Unlock()
 
 	for _, socket := range s.eventManager.sockets {
-		if (socket.connection != nil && !socket.closed.Load()) && socket.username == strconv.Itoa(userID) {
+		if socket.connection != nil && !socket.closed.Load() && socket.userId == userID {
 			socket.connection.WriteJSON(data)
 		}
 	}
