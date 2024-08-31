@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { updateOnlineUserList } from './templates/user-list.js';
 import { loadOldMessages } from './templates/oldMessages.js';
+=======
+import * as UsersList from './templates/user-list.js';
+
+>>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 
 export let socket;
 
@@ -9,7 +14,6 @@ export function setupWebSocket() {
     // Handle when the WebSocket connection is opened
     socket.onopen = function (event) {
         console.log('Connection opened');
-        //TODO: Send a message to the server to get the list of online users
     };
 
     // Handle incoming messages from the server
@@ -17,19 +21,25 @@ export function setupWebSocket() {
         console.log('Message received:', event.data);  // Log raw data received
         const data = JSON.parse(event.data);
         console.log('Parsed message data:', data);  // Log parsed data
-
+        debugger;
         switch (data.type) {
-            case 'initialConnection':
-                localStorage.setItem('currID', data.userID);
-                break;
             case 'onlineUsers':
-                updateOnlineUserList(data.users);
+                UsersList.populateOnlineUserList(data.users);
                 break;
+            case 'newOnlineUser':
+                UsersList.updateOnlineUserList(data.user);
+                break;
+            case 'offlineUser':
+                UsersList.updateOfflineUser(data.user);
+                break
             case 'chat':
                 handleChatMessage(data); 
                 break;
             case 'oldMessages':
                 loadOldMessages(data);
+                break;
+            case 'error':
+                showError(data.message);
                 break;
             default:
                 console.log('Unknown message type:', data.type);
@@ -41,8 +51,7 @@ export function setupWebSocket() {
     // Handle WebSocket connection closure
     socket.onclose = function (event) {
         console.log('Connection closed. Attempting to reconnect...');
-        // updateNavbar(isLoggedIn);
-        // Attempt to reconnect after 1 second in case of failed attempt ot connnect to the server
+        // Attempt to reconnect after 1 second in case of failed attempt ot connect to the server
         setTimeout(setupWebSocket, 1000);
     };
 
@@ -52,10 +61,13 @@ export function setupWebSocket() {
     };
 }
 
-export function getCurrentUserID() {
-    return localStorage.getItem('currID');
-}
 
+<<<<<<< HEAD
+=======
+function loadOldMessages(){
+ //TODO: Implement this function
+}
+>>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 
 // Function to send a message to the server
 function handleChatMessage(data) {

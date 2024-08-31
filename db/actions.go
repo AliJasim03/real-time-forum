@@ -8,18 +8,21 @@ import (
 )
 
 type Message struct {
-    ID         int
-    FromUserID int
-    ToUserID   int
-    Content    string
-    CreatedAt  time.Time
-    IsRead     bool
+	ID         int
+	FromUserID int
+	ToUserID   int
+	Content    string
+	CreatedAt  time.Time
+	IsRead     bool
+<<<<<<< HEAD
 }
 
 type LoadMessages struct {
     Username string
 	Content    string
     CreatedAt  time.Time
+=======
+>>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 }
 
 func AllUsers(db *sql.DB) {
@@ -461,25 +464,72 @@ func GetCommentLikesAndDislikesCount(db *sql.DB, commentID string) (int, int) {
 	return likes, dislikes
 }
 
+func GetOnlineUsersAsync(db *sql.DB, userID int) <-chan []User {
+	//sometimes when the user refreshes the page, the page doesn't get loaded properly
+	// Create a channel to send the result back
+	resultChan := make(chan []User)
+
+	// Start a goroutine to perform the database query
+	go func() {
+		defer close(resultChan) // Ensure the channel is closed once the function completes
+
+		query := `
+        SELECT u.username, u.id
+        FROM users u
+        LEFT JOIN (
+            SELECT u1.id AS user_id, MAX(m.created_at) AS last_interaction
+            FROM users u1
+            JOIN messages m ON u1.id = m.from_user_id OR u1.id = m.to_user_id
+            WHERE m.from_user_id = ? OR m.to_user_id = ?
+            GROUP BY u1.id
+        ) recent_interactions ON u.id = recent_interactions.user_id
+        WHERE u.id != ?  
+		ORDER BY recent_interactions.last_interaction DESC, u.username ASC
+    	`
+
+		rows, err := db.Query(query, userID, userID, userID)
+		if err != nil {
+			log.Printf("Error querying users: %v", err)
+			resultChan <- nil
+			return
+		}
+		defer rows.Close()
+
+		var users []User
+		for rows.Next() {
+			var user User
+			if err := rows.Scan(&user.Username, &user.ID); err != nil {
+				log.Printf("Error scanning user: %v", err)
+				continue
+			}
+			users = append(users, user)
+		}
+		resultChan <- users
+	}()
+
+	return resultChan
+}
+
 func SaveMessage(db *sql.DB, content string, receiverID int, fromUserID int) error {
-    // Prepare the SQL statement for inserting the message into the database
-    query := `
+	// Prepare the SQL statement for inserting the message into the database
+	query := `
         INSERT INTO messages (from_user_id, to_user_id, content, created_at, is_read)
         VALUES (?, ?, ?, ?, ?)
     `
-    
-    // Set the current time as the created_at value
-    createdAt := time.Now()
 
-    // Execute the query with the given parameters
-    _, err := db.Exec(query, fromUserID, receiverID, content, createdAt, false)
-    if err != nil {
-        return err
-    }
+	// Set the current time as the created_at value
+	createdAt := time.Now()
 
-    return nil
+	// Execute the query with the given parameters
+	_, err := db.Exec(query, fromUserID, receiverID, content, createdAt, false)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
+<<<<<<< HEAD
 func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int) ([]LoadMessages, error) {
     query := `
         SELECT U.username, M.content, M.created_at
@@ -513,4 +563,37 @@ func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int) ([]LoadMessage
     }
     
     return messages, nil
+=======
+func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int) ([]Message, error) {
+	query := `
+        SELECT id, from_user_id, to_user_id, content, created_at, is_read 
+        FROM messages 
+        WHERE (from_user_id = ? AND to_user_id = ?) OR (from_user_id = ? AND to_user_id = ?)
+        ORDER BY created_at DESC 
+        LIMIT ?
+    `
+	rows, err := db.Query(query, userID1, userID2, userID2, userID1, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var messages []Message
+	for rows.Next() {
+		var msg Message
+		err := rows.Scan(&msg.ID, &msg.FromUserID, &msg.ToUserID, &msg.Content, &msg.CreatedAt, &msg.IsRead)
+		if err != nil {
+			return nil, err
+		}
+		messages = append(messages, msg)
+	}
+
+	// Reverse the order of messages to get oldest first
+	for i := len(messages)/2 - 1; i >= 0; i-- {
+		opp := len(messages) - 1 - i
+		messages[i], messages[opp] = messages[opp], messages[i]
+	}
+
+	return messages, nil
+>>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 }

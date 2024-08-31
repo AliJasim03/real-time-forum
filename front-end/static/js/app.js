@@ -1,5 +1,5 @@
 import * as Templates from './templates/export.js';
-import { setupWebSocket } from './socket.js';
+import { setupWebSocket,socket } from './socket.js';
 // Define routes
 const routes = {
     '/': Templates.Index.homePage,
@@ -145,11 +145,11 @@ async function logout() {
         navigate('/login');
         Templates.Login.loginPage();
         updateNavbar(false);
-        // hide the user list
+        //close the websocket connection
+        socket.close();
     }).catch(error => {
         showError(error.message);
     });
-
 }
 
 

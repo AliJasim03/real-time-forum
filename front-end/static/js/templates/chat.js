@@ -1,12 +1,18 @@
-import { socket } from '../socket.js';
+import {socket} from '../socket.js';
+
 export function chatPage() {
     const app = $('#app');
+    debugger;
+    const userID = window.location.href.split('?')[1].split('=')[1];
+    const username = $('#user-link-' + userID).text();
     app.html(`
-        <div class="container px-4 px-lg-5">
-            <h2 class="text-center mt-5 mb-4">Chat with: </h2>
-            <div class="row">
-                <div class="col-md-8">
-                    <div id="chat-messages" class="mb-3" style="height: 400px; overflow-y: scroll;"></div>
+        <div class="container">
+            <div class="card mt-5">
+                <div class="card-header text-center">
+                    <h2 id="recipient-name">Chat with: ${username}</h2>
+                </div>
+                <div class="card-body">
+                    <div id="chat-messages" class="mb-3" style="height: 50vh; overflow-y: auto;"></div>
                     <div class="input-group">
                         <input type="text" id="message-input" class="form-control" placeholder="Type your message...">
                         <button class="btn btn-primary" id="send-message">Send</button>
@@ -16,6 +22,7 @@ export function chatPage() {
         </div>
     `);
 
+<<<<<<< HEAD
      openChat();
 
     $('#send-message').on('click', () => sendMessage());
@@ -40,6 +47,11 @@ export function openChat() {
     }
 }
 
+=======
+    $('#send-message').on('click', () => sendMessage());
+}
+
+>>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 function sendMessage() {
     const userID = window.location.href.split('?')[1].split('=')[1];
     const message = $('#message-input').val();
@@ -47,19 +59,17 @@ function sendMessage() {
         alert('User ID is missing');
         return;
     }
-    if (userID === getCurrentUserID()) {
-        alert('You cannot chat with yourself');
-        return;
-    }
+
     if (message.trim() !== '') {
-        const chatMessage = { type: 'chat', to: userID, message: message };
-        yourMesssges(message);
+        let userId_Parsed = parseInt(userID);
+        const chatMessage = { type: 'chat', to: userId_Parsed, message: message };
+        yourMessages(message);
         socket.send(JSON.stringify(chatMessage));
-        $('#message-input').val(''); 
+        $('#message-input').val('');
     }
 }
 
-function yourMesssges(message) {
+function yourMessages(message) {
     const now = new Date();
     const time = now.toLocaleTimeString();
     const myID = 'YOU';
@@ -75,9 +85,9 @@ function yourMesssges(message) {
     chatContainer.appendChild(messageElement);
 }
 
-function createMessageElement({ FromUserID, Content, CreatedAt }) {
+function createMessageElement({FromUserID, Content, CreatedAt}) {
     const messageElement = document.createElement('div');
-    messageElement.classList.add('chat-message', 'p-3', 'mb-2', 'border', 'rounded'); 
+    messageElement.classList.add('chat-message', 'p-3', 'mb-2', 'border', 'rounded');
 
     const userElement = document.createElement('div');
     userElement.classList.add('message-user', 'font-weight-bold', 'text-primary');
@@ -96,9 +106,5 @@ function createMessageElement({ FromUserID, Content, CreatedAt }) {
     messageElement.appendChild(timeElement);
 
     return messageElement;
-}
-
-function getCurrentUserID() {
-    return localStorage.getItem('currID');
 }
 

@@ -1,5 +1,7 @@
 package db
 
+import "time"
+
 type Post struct {
 	ID              int
 	Title           string
@@ -47,4 +49,11 @@ type CommentJson struct {
 
 type IDJson struct {
 	ID string `json:"ID"`
+}
+
+type User struct {
+	Username        string
+	ID              int
+	IsOnline        bool
+	LastMessageTime time.Time
 }

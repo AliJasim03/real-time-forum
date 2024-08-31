@@ -2,10 +2,14 @@ package api
 
 import (
 	"encoding/json"
+<<<<<<< HEAD
+	"strconv"
 	"time"
+
+=======
+>>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 	// "fmt"
 	"log"
-	"strconv"
 	"sync"
 	"sync/atomic"
 
@@ -22,15 +26,8 @@ type socketsManager struct {
 
 type userSocket struct {
 	connection *websocket.Conn
-	username   string
+	userId     int
 	closed     *atomic.Bool
-}
-
-type User struct {
-	Username string
-	ID       int
-	IsOnline bool
-    LastMessageTime time.Time  
 }
 
 var upgrader = websocket.Upgrader{
@@ -40,12 +37,14 @@ var upgrader = websocket.Upgrader{
 
 type ChatMessage struct {
 	Type    string `json:"type"`
-	To      string `json:"to"`
+	From    int    `json:"from"`
+	To      int    `json:"to"`
 	Message string `json:"message"`
 }
 
-type messageSent struct {
+/*type Load struct {
 	Type    string `json:"type"`
+<<<<<<< HEAD
 	From    string `json:"from"`
 	Message string `json:"message"`
 }
@@ -58,6 +57,12 @@ type Load struct {
     Content string `json:"message"`
 }
 
+=======
+	userID1 int    `json:"userID1"`
+	userID2 int    `json:"userID2"`
+	Content string `json:"message"`
+}*/
+>>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 
 type LoadMessages struct {
 	Username  string    `json:"username"`
@@ -74,66 +79,77 @@ func makeSocketManager() *socketsManager {
 	}
 }
 
+<<<<<<< HEAD
 
 
 func (s *server) LastMessage(conn *websocket.Conn) {
-    _, message, err := conn.ReadMessage()
-    if err != nil {
-        log.Printf("Error reading WebSocket message: %v", err)
-        return
-    }
+=======
+/*func (s *server) LastMessage(conn *websocket.Conn) {
+>>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
+	_, message, err := conn.ReadMessage()
+	if err != nil {
+		log.Printf("Error reading WebSocket message: %v", err)
+		return
+	}
 
-    var load Load
-    if err := json.Unmarshal(message, &load); err != nil {
-        log.Printf("Error unmarshaling message: %v", err)
-        return
-    }
+	var load Load
+	if err := json.Unmarshal(message, &load); err != nil {
+		log.Printf("Error unmarshaling message: %v", err)
+		return
+	}
 
-    userID1, err := strconv.Atoi(load.UserID1)
-    if err != nil {
-        log.Printf("Error converting userID1 to integer: %v", err)
-        return
-    }
+	// Convert userID1 and userID2 to integers
+	userID1, err := strconv.Atoi(load.UserID1)
+	if err != nil {
+		log.Printf("Error converting userID1 to integer: %v", err)
+		return
+	}
 
-    userID2, err := strconv.Atoi(load.UserID2)
-    if err != nil {
-        log.Printf("Error converting userID2 to integer: %v", err)
-        return
-    }
+	userID2, err := strconv.Atoi(load.UserID2)
+	if err != nil {
+		log.Printf("Error converting userID2 to integer: %v", err)
+		return
+	}
 
-    log.Printf("userID1: %d, userID2: %d", userID1, userID2)
+	log.Printf("userID1: %d, userID2: %d", userID1, userID2)
 
-    messages, err := backend.GetLastMessages(s.db, userID1, userID2, 10)
-    if err != nil {
-        log.Printf("Error fetching last messages: %v", err)
-        return
-    }
+	messages, err := backend.GetLastMessages(s.db, userID1, userID2, 10)
+	if err != nil {
+		log.Printf("Error fetching last messages: %v", err)
+		return
+	}
 
-    var convertedMessages []LoadMessages
-    for _, msg := range messages {
-        convertedMessages = append(convertedMessages, LoadMessages{
-            Username:  msg.Username,
-            Content:   msg.Content,
-            CreatedAt: msg.CreatedAt,
-        })
-    }
+	var convertedMessages []LoadMessages
+	for _, msg := range messages {
+		convertedMessages = append(convertedMessages, LoadMessages{
+			Username:  msg.Username,
+			Content:   msg.Content,
+			CreatedAt: msg.CreatedAt,
+		})
+	}
 
-    log.Println("All messages:", convertedMessages)
+	log.Println("All messages:", convertedMessages)
 
-    response := struct {
-        Type     string         `json:"type"`
-        Messages []LoadMessages `json:"messages"`
-    }{
-        Type:     "oldMessages",
-        Messages: convertedMessages,
-    }
+	response := struct {
+		Type     string         `json:"type"`
+		Messages []LoadMessages `json:"messages"`
+	}{
+		Type:     "oldMessages",
+		Messages: convertedMessages,
+	}
 
-    if err := conn.WriteJSON(response); err != nil {
-        log.Printf("Error sending last messages: %v", err)
-    }
+	if err := conn.WriteJSON(response); err != nil {
+		log.Printf("Error sending last messages: %v", err)
+	}
 }
+<<<<<<< HEAD
 
 func (s *server) handleMessages(conn *websocket.Conn, userID int, connectionId uint64) {
+=======
+*/
+
+func (s *server) handleMessages(conn *websocket.Conn, userID int) {
+>>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 	for {
 		var chatMessage ChatMessage
 		log.Println("Waiting for message...")
@@ -154,13 +170,9 @@ func (s *server) handleMessages(conn *websocket.Conn, userID int, connectionId u
 
 		log.Printf("Parsed message: %+v", chatMessage)
 
-		toUserID, err := strconv.Atoi(chatMessage.To)
-		if err != nil {
-			log.Printf("Error converting 'to' to integer: %v", err)
-			continue
-		}
+		chatMessage.From = userID
 
-		err = backend.SaveMessage(s.db, chatMessage.Message, toUserID, userID)
+		err = backend.SaveMessage(s.db, chatMessage.Message, chatMessage.To, userID)
 		if err != nil {
 			log.Printf("Error saving message: %v", err)
 			continue
@@ -168,14 +180,14 @@ func (s *server) handleMessages(conn *websocket.Conn, userID int, connectionId u
 
 		log.Println("Message saved successfully")
 
-		s.forwardMessage(chatMessage, userID)
+		s.forwardMessage(chatMessage)
 		log.Println("Message forwarded, ready for the next message.")
 	}
 
 	log.Println("Connection closed or error occurred, exiting message handling loop.")
 }
 
-func (e *socketsManager) addConnection(conn *websocket.Conn, username string) uint64 {
+func (e *socketsManager) addConnection(conn *websocket.Conn, userId int) uint64 {
 	connectionId := e.socketCounter.Add(1)
 
 	e.lock.Lock()
@@ -183,35 +195,27 @@ func (e *socketsManager) addConnection(conn *websocket.Conn, username string) ui
 
 	e.sockets[connectionId] = userSocket{
 		connection: conn,
-		username:   username,
+		userId:     userId,
 		closed:     &atomic.Bool{},
 	}
 
-	// Send the user ID to the client
-	userID, _ := strconv.Atoi(username)
-	initialMessage := map[string]interface{}{
-		"type":   "initialConnection",
-		"userID": userID,
-	}
-	conn.WriteJSON(initialMessage)
-
-	log.Printf("User %s connected with connection ID %d", username, connectionId)
 	return connectionId
 }
 
-func (e *socketsManager) removeConnectionByUsername(username string) {
+func (s *server) removeConnectionByUserId(userId int) {
+	e := s.eventManager
 	e.lock.Lock()
 	defer e.lock.Unlock()
 
 	for connectionId, socket := range e.sockets {
-		if socket.username == username && !socket.closed.Load() {
+		if socket.userId == userId && !socket.closed.Load() {
 			socket.closed.Store(true)
 			delete(e.sockets, connectionId)
-			log.Printf("Connection ID %d removed for user %s", connectionId, username)
+			log.Printf("Connection ID %d removed for user %s", connectionId, userId)
 			return
 		}
 	}
-	log.Printf("No active connection found for user %s", username)
+	log.Printf("No active connection found for user %s", userId)
 }
 
 func (s *server) removeConnection(connectionId uint64) {
@@ -222,7 +226,7 @@ func (s *server) removeConnection(connectionId uint64) {
 	if socket, exists := e.sockets[connectionId]; exists && !socket.closed.Load() {
 		socket.closed.Store(true)
 		delete(e.sockets, connectionId)
-		log.Printf("Connection ID %d removed for user %s", connectionId, socket.username)
+		log.Printf("Connection ID %d removed for user %s", connectionId, socket.userId)
 		if err := socket.connection.Close(); err != nil {
 			log.Printf("Error closing WebSocket connection: %v", err)
 		}
@@ -230,53 +234,3 @@ func (s *server) removeConnection(connectionId uint64) {
 		log.Printf("Attempted to remove non-existent or already closed connection ID %d", connectionId)
 	}
 }
-
-func (s *server) getOnlineUsers(currentUserID int) []User {
-    s.eventManager.lock.Lock()
-    defer s.eventManager.lock.Unlock()
-    query := `
-        SELECT u.username, u.id
-        FROM users u
-        LEFT JOIN (
-            SELECT u1.id AS user_id, MAX(m.created_at) AS last_interaction
-            FROM users u1
-            JOIN messages m ON u1.id = m.from_user_id OR u1.id = m.to_user_id
-            WHERE m.from_user_id = ? OR m.to_user_id = ?
-            GROUP BY u1.id
-        ) recent_interactions ON u.id = recent_interactions.user_id
-        WHERE u.id != ?  
-		ORDER BY recent_interactions.last_interaction DESC, u.username ASC
-    `
-    
-    rows, err := s.db.Query(query, currentUserID, currentUserID, currentUserID)
-    if err != nil {
-        log.Printf("Error querying users: %v", err)
-        return nil
-    }
-    defer rows.Close()
-
-    var users []User
-    for rows.Next() {
-        var user User
-        if err := rows.Scan(&user.Username, &user.ID); err != nil {
-            log.Printf("Error scanning user: %v", err)
-            continue
-        }
-        users = append(users, user)
-    }
-
-    for i := range users {
-        for _, socket := range s.eventManager.sockets {
-            if socket.username == strconv.Itoa(users[i].ID) {
-                users[i].IsOnline = true
-                break
-            }
-        }
-    }
-    return users
-}
-
-
-
-
-
