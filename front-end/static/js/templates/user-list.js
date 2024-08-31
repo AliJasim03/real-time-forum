@@ -1,7 +1,7 @@
 import { checkAuth, navigate } from '../app.js';
 
 // Update the list of online users in the DOM
-export function updateOnlineUserList(users) {
+export function populateOnlineUserList(users) {
     const userCol = $('#user-col');
     if (!checkAuth()) {
         userCol.addClass('d-none');
@@ -33,5 +33,23 @@ export function updateOnlineUserList(users) {
         userItem.appendChild(userLink);
         userList.append(userItem);
     });
+}
+
+
+
+export function updateOnlineUserList(userId){
+    debugger;
+    const userLink = document.getElementById(`user-link-${userId}`);
+    if (userLink) {
+        userLink.nextElementSibling.textContent = 'Online';
+        userLink.nextElementSibling.className = 'badge bg-success';
+    }
+}
+export function updateOfflineUser(userId){
+    const userLink = document.getElementById(`user-link-${userId}`);
+    if (userLink) {
+        userLink.nextElementSibling.textContent = 'Offline';
+        userLink.nextElementSibling.className = 'badge bg-secondary';
+    }
 }
 

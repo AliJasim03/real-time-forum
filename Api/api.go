@@ -19,7 +19,11 @@ type LikeDisJson struct {
 	IsLike string `json:"isLike"`
 }
 
-func (s *server) handleGetLastMessages(w http.ResponseWriter, r *http.Request) {
+func (s *server) indexHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "front-end/index.html")
+}
+
+/*func (s *server) handleGetLastMessages(w http.ResponseWriter, r *http.Request) {
 	userID1, _ := strconv.Atoi(r.URL.Query().Get("user1"))
 	userID2, _ := strconv.Atoi(r.URL.Query().Get("user2"))
 	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
@@ -36,7 +40,7 @@ func (s *server) handleGetLastMessages(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(messages)
-}
+}*/
 
 func (s *server) likeDislikePost(w http.ResponseWriter, r *http.Request) {
 	// get the cookie to use token to get userID

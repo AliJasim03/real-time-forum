@@ -32,20 +32,17 @@ function sendMessage() {
         alert('User ID is missing');
         return;
     }
-    if (userID === getCurrentUserID()) {
-        alert('You cannot chat with yourself');
-        return;
-    }
+
     if (message.trim() !== '') {
         let userId_Parsed = parseInt(userID);
         const chatMessage = { type: 'chat', to: userId_Parsed, message: message };
-        yourMesssges(message);
+        yourMessages(message);
         socket.send(JSON.stringify(chatMessage));
         $('#message-input').val('');
     }
 }
 
-function yourMesssges(message) {
+function yourMessages(message) {
     const now = new Date();
     const time = now.toLocaleTimeString();
     const myID = 'YOU';
@@ -82,9 +79,5 @@ function createMessageElement({FromUserID, Content, CreatedAt}) {
     messageElement.appendChild(timeElement);
 
     return messageElement;
-}
-
-function getCurrentUserID() {
-    return localStorage.getItem('currID');
 }
 

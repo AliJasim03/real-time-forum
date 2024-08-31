@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"time"
 	// "fmt"
 	"log"
 	"sync"
@@ -25,13 +24,6 @@ type userSocket struct {
 	closed     *atomic.Bool
 }
 
-type User struct {
-	Username        string
-	ID              int
-	IsOnline        bool
-	LastMessageTime time.Time
-}
-
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -44,12 +36,12 @@ type ChatMessage struct {
 	Message string `json:"message"`
 }
 
-type Load struct {
+/*type Load struct {
 	Type    string `json:"type"`
 	userID1 int    `json:"userID1"`
 	userID2 int    `json:"userID2"`
 	Content string `json:"message"`
-}
+}*/
 
 func makeSocketManager() *socketsManager {
 	return &socketsManager{
@@ -141,14 +133,6 @@ func (e *socketsManager) addConnection(conn *websocket.Conn, userId int) uint64 
 		closed:     &atomic.Bool{},
 	}
 
-	// Send the user ID to the client
-	initialMessage := map[string]interface{}{
-		"type":   "initialConnection",
-		"userID": userId,
-	}
-	conn.WriteJSON(initialMessage)
-
-	log.Printf("User %s connected with connection ID %d", userId, connectionId)
 	return connectionId
 }
 
@@ -183,49 +167,4 @@ func (s *server) removeConnection(connectionId uint64) {
 	} else {
 		log.Printf("Attempted to remove non-existent or already closed connection ID %d", connectionId)
 	}
-}
-
-func (s *server) getOnlineUsers(currentUserID int) []User {
-	s.eventManager.lock.Lock()
-	defer s.eventManager.lock.Unlock()
-	query := `
-        SELECT u.username, u.id
-        FROM users u
-        LEFT JOIN (
-            SELECT u1.id AS user_id, MAX(m.created_at) AS last_interaction
-            FROM users u1
-            JOIN messages m ON u1.id = m.from_user_id OR u1.id = m.to_user_id
-            WHERE m.from_user_id = ? OR m.to_user_id = ?
-            GROUP BY u1.id
-        ) recent_interactions ON u.id = recent_interactions.user_id
-        WHERE u.id != ?  
-		ORDER BY recent_interactions.last_interaction DESC, u.username ASC
-    `
-
-	rows, err := s.db.Query(query, currentUserID, currentUserID, currentUserID)
-	if err != nil {
-		log.Printf("Error querying users: %v", err)
-		return nil
-	}
-	defer rows.Close()
-
-	var users []User
-	for rows.Next() {
-		var user User
-		if err := rows.Scan(&user.Username, &user.ID); err != nil {
-			log.Printf("Error scanning user: %v", err)
-			continue
-		}
-		users = append(users, user)
-	}
-
-	for i := range users {
-		for _, socket := range s.eventManager.sockets {
-			if socket.userId == users[i].ID {
-				users[i].IsOnline = true
-				break
-			}
-		}
-	}
-	return users
 }

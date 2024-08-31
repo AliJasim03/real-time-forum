@@ -1,14 +1,11 @@
 package api
 
 import (
+	backend "forum/db"
 	"log"
 	"net/http"
 	// "time"
 )
-
-func (s *server) indexHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "front-end/index.html")
-}
 
 // listen for event from the server
 func (s *server) events(w http.ResponseWriter, r *http.Request) {
@@ -28,8 +25,8 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 
 	connectionId := s.eventManager.addConnection(conn, userID)
 
-	// Broadcast the list of online users after a new connection is added
-	s.broadcastOnlineUsers(userID)
+	// Send the list of online users to the new connection
+	s.sendOnlineUsers(userID)
 
 	// s.LastMesssge(conn)
 
@@ -39,7 +36,7 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 	// Broadcast the list of online users after a connection is removed
 	log.Println("Broadcast the list of online users after connection removal.")
 	s.removeConnection(connectionId)
-	s.broadcastOnlineUsers(userID)
+	s.sendOfflineUser(userID)
 }
 
 func (s *server) forwardMessage(chatMessage ChatMessage) {
@@ -69,13 +66,41 @@ func (s *server) forwardMessage(chatMessage ChatMessage) {
 	s.eventManager.lock.Unlock()
 }
 
-func (s *server) broadcastOnlineUsers(userID int) {
-	onlineUsers := s.getOnlineUsers(userID)
+func (s *server) sendOnlineUsers(userID int) {
+	onlineUsersChan := backend.GetOnlineUsersAsync(s.db, userID)
+
+	// Use the result when it's ready
+	onlineUsers := <-onlineUsersChan
+
+	for i := range onlineUsers {
+		for _, socket := range s.eventManager.sockets {
+			if socket.userId == onlineUsers[i].ID {
+				onlineUsers[i].IsOnline = true
+				break
+			}
+		}
+	}
+
 	data := map[string]interface{}{
 		"type":  "onlineUsers",
 		"users": onlineUsers,
 	}
-	s.sendEvents(data)
+
+	newUser := map[string]interface{}{
+		"type": "newOnlineUser",
+		"user": userID,
+	}
+
+	s.sendEventToUser(data, userID)
+	s.sendEventToAll(newUser, userID)
+}
+
+func (s *server) sendOfflineUser(userID int) {
+	data := map[string]interface{}{
+		"type": "offlineUser",
+		"user": userID,
+	}
+	s.sendEventToAll(data, userID)
 }
 
 func (s *server) sendEventToUser(data interface{}, userID int) {
@@ -84,7 +109,27 @@ func (s *server) sendEventToUser(data interface{}, userID int) {
 
 	for _, socket := range s.eventManager.sockets {
 		if socket.connection != nil && !socket.closed.Load() && socket.userId == userID {
-			socket.connection.WriteJSON(data)
+			err := socket.connection.WriteJSON(data)
+			if err != nil {
+				log.Printf("Error sending event to user %d: %v", userID, err)
+			}
+			break
+		}
+	}
+}
+
+// sent to all except the user
+func (s *server) sendEventToAll(data interface{}, userID int) {
+	s.eventManager.lock.Lock()
+	defer s.eventManager.lock.Unlock()
+
+	for connectionId, socket := range s.eventManager.sockets {
+		if socket.connection != nil && !socket.closed.Load() && socket.userId != userID {
+			err := socket.connection.WriteJSON(data)
+			if err != nil {
+				log.Printf("Error sending event to connection ID %d: %v", connectionId, err)
+				socket.closed.Store(true)
+			}
 		}
 	}
 }
@@ -99,21 +144,6 @@ func (s *server) sendEvents(data interface{}) {
 		}
 	}
 }
-
-// func (s *server) sendToAll(data interface{}) {
-// 	s.eventManager.lock.Lock()
-// 	defer s.eventManager.lock.Unlock()
-
-// 	for connectionId, socket := range s.eventManager.sockets {
-// 		if socket.connection != nil && !socket.closed.Load() {
-// 			err := socket.connection.WriteJSON(data)
-// 			if err != nil {
-// 				log.Printf("Error sending event to connection ID %d: %v", connectionId, err)
-// 				socket.closed.Store(true)
-// 			}
-// 		}
-// 	}
-// }
 
 // func (s *server) broadcastOnlineUsers(userID int) {
 // 	onlineUsers := s.getOnlineUsers(userID)
