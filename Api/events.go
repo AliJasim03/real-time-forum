@@ -2,7 +2,6 @@ package api
 
 import (
 	backend "forum/db"
-	backend "forum/db"
 	"log"
 	"net/http"
 	// "time"
@@ -32,16 +31,14 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 	s.LastMessage(conn)
 
 	// inside it infinite loop to handle messages and keep connection alive
-	s.handleMessages(conn, userID, uint64(connectionId))
+	s.handleMessages(conn, userID)
 
 	// Broadcast the list of online users after a connection is removed
 	log.Println("Broadcast the list of online users after connection removal.")
 	s.removeConnection(connectionId)
 	s.sendOfflineUser(userID)
-	s.sendOfflineUser(userID)
 }
 
-func (s *server) forwardMessage(chatMessage ChatMessage) {
 func (s *server) forwardMessage(chatMessage ChatMessage) {
 	s.eventManager.lock.Lock()
 

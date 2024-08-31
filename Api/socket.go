@@ -2,12 +2,6 @@ package api
 
 import (
 	"encoding/json"
-<<<<<<< HEAD
-	"strconv"
-	"time"
-
-=======
->>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 	// "fmt"
 	"log"
 	"sync"
@@ -44,25 +38,10 @@ type ChatMessage struct {
 
 /*type Load struct {
 	Type    string `json:"type"`
-<<<<<<< HEAD
-	From    string `json:"from"`
-	Message string `json:"message"`
-}
-
-
-type Load struct {
-    Type    string `json:"type"`
-    UserID1 string `json:"userID1"`
-    UserID2 string `json:"userID2"`
-    Content string `json:"message"`
-}
-
-=======
 	userID1 int    `json:"userID1"`
 	userID2 int    `json:"userID2"`
 	Content string `json:"message"`
 }*/
->>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 
 type LoadMessages struct {
 	Username  string    `json:"username"`
@@ -79,11 +58,9 @@ func makeSocketManager() *socketsManager {
 	}
 }
 
-<<<<<<< HEAD
 
 
 func (s *server) LastMessage(conn *websocket.Conn) {
-=======
 /*func (s *server) LastMessage(conn *websocket.Conn) {
 >>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 	_, message, err := conn.ReadMessage()
@@ -142,14 +119,9 @@ func (s *server) LastMessage(conn *websocket.Conn) {
 		log.Printf("Error sending last messages: %v", err)
 	}
 }
-<<<<<<< HEAD
-
-func (s *server) handleMessages(conn *websocket.Conn, userID int, connectionId uint64) {
-=======
 */
 
 func (s *server) handleMessages(conn *websocket.Conn, userID int) {
->>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 	for {
 		var chatMessage ChatMessage
 		log.Println("Waiting for message...")

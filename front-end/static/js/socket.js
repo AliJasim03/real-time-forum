@@ -1,10 +1,7 @@
-<<<<<<< HEAD
 import { updateOnlineUserList } from './templates/user-list.js';
 import { loadOldMessages } from './templates/oldMessages.js';
-=======
 import * as UsersList from './templates/user-list.js';
 
->>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 
 export let socket;
 
@@ -41,6 +38,9 @@ export function setupWebSocket() {
             case 'error':
                 showError(data.message);
                 break;
+            case 'error':
+                showError(data.message);
+                break;
             default:
                 console.log('Unknown message type:', data.type);
         }
@@ -62,12 +62,9 @@ export function setupWebSocket() {
 }
 
 
-<<<<<<< HEAD
-=======
 function loadOldMessages(){
  //TODO: Implement this function
 }
->>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 
 // Function to send a message to the server
 function handleChatMessage(data) {

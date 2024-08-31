@@ -14,15 +14,12 @@ type Message struct {
 	Content    string
 	CreatedAt  time.Time
 	IsRead     bool
-<<<<<<< HEAD
 }
 
 type LoadMessages struct {
     Username string
 	Content    string
     CreatedAt  time.Time
-=======
->>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 }
 
 func AllUsers(db *sql.DB) {
@@ -529,7 +526,6 @@ func SaveMessage(db *sql.DB, content string, receiverID int, fromUserID int) err
 	return nil
 }
 
-<<<<<<< HEAD
 func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int) ([]LoadMessages, error) {
     query := `
         SELECT U.username, M.content, M.created_at
@@ -563,7 +559,6 @@ func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int) ([]LoadMessage
     }
     
     return messages, nil
-=======
 func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int) ([]Message, error) {
 	query := `
         SELECT id, from_user_id, to_user_id, content, created_at, is_read 
@@ -595,5 +590,4 @@ func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int) ([]Message, er
 	}
 
 	return messages, nil
->>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 }

@@ -22,7 +22,6 @@ export function chatPage() {
         </div>
     `);
 
-<<<<<<< HEAD
      openChat();
 
     $('#send-message').on('click', () => sendMessage());
@@ -47,11 +46,8 @@ export function openChat() {
     }
 }
 
-=======
     $('#send-message').on('click', () => sendMessage());
 }
-
->>>>>>> f2acae62c74ad55cbcac701cf0974175d8abf24b
 function sendMessage() {
     const userID = window.location.href.split('?')[1].split('=')[1];
     const message = $('#message-input').val();
