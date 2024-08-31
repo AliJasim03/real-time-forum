@@ -1,4 +1,5 @@
 import { updateOnlineUserList } from './templates/user-list.js';
+import { loadOldMessages } from './templates/oldMessages.js';
 
 export let socket;
 
@@ -27,8 +28,8 @@ export function setupWebSocket() {
             case 'chat':
                 handleChatMessage(data); 
                 break;
-            case 'chatOpen':
-                loadOldMessages();
+            case 'oldMessages':
+                loadOldMessages(data);
                 break;
             default:
                 console.log('Unknown message type:', data.type);
@@ -55,9 +56,6 @@ export function getCurrentUserID() {
     return localStorage.getItem('currID');
 }
 
-function loadOldMessages(){
-    
-}
 
 // Function to send a message to the server
 function handleChatMessage(data) {

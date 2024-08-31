@@ -6,7 +6,7 @@ export function chatPage() {
             <h2 class="text-center mt-5 mb-4">Chat with: </h2>
             <div class="row">
                 <div class="col-md-8">
-                    <div id="chat-messages" class="mb-3" style="height: 400px; overflow-y: auto;"></div>
+                    <div id="chat-messages" class="mb-3" style="height: 400px; overflow-y: scroll;"></div>
                     <div class="input-group">
                         <input type="text" id="message-input" class="form-control" placeholder="Type your message...">
                         <button class="btn btn-primary" id="send-message">Send</button>
@@ -16,12 +16,14 @@ export function chatPage() {
         </div>
     `);
 
-    // openChat();
+     openChat();
 
     $('#send-message').on('click', () => sendMessage());
 }
 
-/*function openChat(){
+export function openChat() {
+    console.log('Socket:', socket); // Check if socket is undefined
+
     const userID = window.location.href.split('?')[1].split('=')[1];
 
     if (userID === getCurrentUserID()) {
@@ -29,9 +31,14 @@ export function chatPage() {
         return;
     }
 
-    const opener = { type: 'chatOpen',userID1: userID, userID2: getCurrentUserID() ,message: 'open' };
-    socket.send(JSON.stringify(opener));
-}*/
+    const opener = { type: 'chatOpen', userID1: userID, userID2: getCurrentUserID(), message: 'open' };
+    console.log(opener);
+    if (socket) {
+        socket.send(JSON.stringify(opener));
+    } else {
+        console.error('Socket is not initialized');
+    }
+}
 
 function sendMessage() {
     const userID = window.location.href.split('?')[1].split('=')[1];

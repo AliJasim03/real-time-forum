@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -13,6 +14,12 @@ type Message struct {
     Content    string
     CreatedAt  time.Time
     IsRead     bool
+}
+
+type LoadMessages struct {
+    Username string
+	Content    string
+    CreatedAt  time.Time
 }
 
 func AllUsers(db *sql.DB) {
@@ -473,38 +480,37 @@ func SaveMessage(db *sql.DB, content string, receiverID int, fromUserID int) err
     return nil
 }
 
-func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int) ([]Message, error) {
+func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int) ([]LoadMessages, error) {
     query := `
-        SELECT id, from_user_id, to_user_id, content, created_at, is_read 
-        FROM messages 
-        WHERE (from_user_id = ? AND to_user_id = ?) OR (from_user_id = ? AND to_user_id = ?)
-        ORDER BY created_at DESC 
+        SELECT U.username, M.content, M.created_at
+        FROM messages M
+        JOIN users U ON M.from_user_id = U.id
+        WHERE (M.from_user_id = ? AND M.to_user_id = ?) 
+           OR (M.from_user_id = ? AND M.to_user_id = ?)
+        ORDER BY M.created_at DESC
         LIMIT ?
     `
+    
+    
     rows, err := db.Query(query, userID1, userID2, userID2, userID1, limit)
     if err != nil {
         return nil, err
     }
     defer rows.Close()
 
-    var messages []Message
-    for rows.Next() {
-        var msg Message
-        err := rows.Scan(&msg.ID, &msg.FromUserID, &msg.ToUserID, &msg.Content, &msg.CreatedAt, &msg.IsRead)
-        if err != nil {
-            return nil, err
-        }
-        messages = append(messages, msg)
+    var messages []LoadMessages
+	for rows.Next() {
+		var msg LoadMessages
+		if err := rows.Scan(&msg.Username, &msg.Content, &msg.CreatedAt); err != nil {
+			return nil, err
+		}
+		log.Printf("Message: %+v", msg)  // Log each message
+		messages = append(messages, msg)
+	}
+	
+    if err := rows.Err(); err != nil {
+        return nil, err
     }
-
-    // Reverse the order of messages to get oldest first
-    for i := len(messages)/2 - 1; i >= 0; i-- {
-        opp := len(messages) - 1 - i
-        messages[i], messages[opp] = messages[opp], messages[i]
-    }
-
+    
     return messages, nil
 }
-
-
-
