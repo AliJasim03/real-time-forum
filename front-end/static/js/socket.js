@@ -30,7 +30,7 @@ export function setupWebSocket() {
                 UsersList.updateOfflineUser(data.user);
                 break
             case 'chat':
-                handleChatMessage(data); 
+                handleChatMessage(data);
                 break;
             case 'oldMessages':
                 loadOldMessages(data);
@@ -61,16 +61,11 @@ export function setupWebSocket() {
     };
 }
 
-
-function loadOldMessages(){
- //TODO: Implement this function
-}
-
 // Function to send a message to the server
 function handleChatMessage(data) {
     try {
         if (data !== null && typeof data === 'object') {
-            displayNewMessage(data.from, data.message, data.Username); 
+            displayNewMessage(data.from, data.message, data.Username);
         } else {
             console.error("Invalid message format:", data);
         }

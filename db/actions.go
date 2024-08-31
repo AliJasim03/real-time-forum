@@ -17,13 +17,13 @@ type Message struct {
 }
 
 type LoadMessages struct {
-    Username string
-	Content    string
-    CreatedAt  time.Time
+	Username  string
+	Content   string
+	CreatedAt time.Time
 }
 
 func AllUsers(db *sql.DB) {
-	//rows, err := db.Query("SELECT id, user_id, title, content, strftime('%Y-%m-%d %H:%M:%S', created_at) AS created_at FROM posts ORDER BY created_at DESC")
+	// rows, err := db.Query("SELECT id, user_id, title, content, strftime('%Y-%m-%d %H:%M:%S', created_at) AS created_at FROM posts ORDER BY created_at DESC")
 	// if err != nil {
 	// 	fmt.Println(err)
 	// 	return
@@ -462,7 +462,7 @@ func GetCommentLikesAndDislikesCount(db *sql.DB, commentID string) (int, int) {
 }
 
 func GetOnlineUsersAsync(db *sql.DB, userID int) <-chan []User {
-	//sometimes when the user refreshes the page, the page doesn't get loaded properly
+	// sometimes when the user refreshes the page, the page doesn't get loaded properly
 	// Create a channel to send the result back
 	resultChan := make(chan []User)
 
@@ -527,7 +527,7 @@ func SaveMessage(db *sql.DB, content string, receiverID int, fromUserID int) err
 }
 
 func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int) ([]LoadMessages, error) {
-    query := `
+	query := `
         SELECT U.username, M.content, M.created_at
         FROM messages M
         JOIN users U ON M.from_user_id = U.id
@@ -536,57 +536,25 @@ func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int) ([]LoadMessage
         ORDER BY M.created_at DESC
         LIMIT ?
     `
-    
-    
-    rows, err := db.Query(query, userID1, userID2, userID2, userID1, limit)
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
 
-    var messages []LoadMessages
-	for rows.Next() {
-		var msg LoadMessages
-		if err := rows.Scan(&msg.Username, &msg.Content, &msg.CreatedAt); err != nil {
-			return nil, err
-		}
-		log.Printf("Message: %+v", msg)  // Log each message
-		messages = append(messages, msg)
-	}
-	
-    if err := rows.Err(); err != nil {
-        return nil, err
-    }
-    
-    return messages, nil
-func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int) ([]Message, error) {
-	query := `
-        SELECT id, from_user_id, to_user_id, content, created_at, is_read 
-        FROM messages 
-        WHERE (from_user_id = ? AND to_user_id = ?) OR (from_user_id = ? AND to_user_id = ?)
-        ORDER BY created_at DESC 
-        LIMIT ?
-    `
 	rows, err := db.Query(query, userID1, userID2, userID2, userID1, limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var messages []Message
+	var messages []LoadMessages
 	for rows.Next() {
-		var msg Message
-		err := rows.Scan(&msg.ID, &msg.FromUserID, &msg.ToUserID, &msg.Content, &msg.CreatedAt, &msg.IsRead)
-		if err != nil {
+		var msg LoadMessages
+		if err := rows.Scan(&msg.Username, &msg.Content, &msg.CreatedAt); err != nil {
 			return nil, err
 		}
+		log.Printf("Message: %+v", msg) // Log each message
 		messages = append(messages, msg)
 	}
 
-	// Reverse the order of messages to get oldest first
-	for i := len(messages)/2 - 1; i >= 0; i-- {
-		opp := len(messages) - 1 - i
-		messages[i], messages[opp] = messages[opp], messages[i]
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return messages, nil

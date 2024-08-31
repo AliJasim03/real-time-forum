@@ -1,4 +1,4 @@
-import {socket} from '../socket.js';
+import { socket } from '../socket.js';
 
 export function chatPage() {
     const app = $('#app');
@@ -22,7 +22,7 @@ export function chatPage() {
         </div>
     `);
 
-     openChat();
+    openChat();
 
     $('#send-message').on('click', () => sendMessage());
 }
@@ -32,12 +32,7 @@ export function openChat() {
 
     const userID = window.location.href.split('?')[1].split('=')[1];
 
-    if (userID === getCurrentUserID()) {
-        console.error('You cannot chat with yourself');
-        return;
-    }
-
-    const opener = { type: 'chatOpen', userID1: userID, userID2: getCurrentUserID(), message: 'open' };
+    const opener = { type: 'chatOpen', userID1: userID, message: 'open' };
     console.log(opener);
     if (socket) {
         socket.send(JSON.stringify(opener));
@@ -46,8 +41,6 @@ export function openChat() {
     }
 }
 
-    $('#send-message').on('click', () => sendMessage());
-}
 function sendMessage() {
     const userID = window.location.href.split('?')[1].split('=')[1];
     const message = $('#message-input').val();
@@ -81,7 +74,7 @@ function yourMessages(message) {
     chatContainer.appendChild(messageElement);
 }
 
-function createMessageElement({FromUserID, Content, CreatedAt}) {
+function createMessageElement({ FromUserID, Content, CreatedAt }) {
     const messageElement = document.createElement('div');
     messageElement.classList.add('chat-message', 'p-3', 'mb-2', 'border', 'rounded');
 
