@@ -31,8 +31,9 @@ export function openChat() {
     console.log('Socket:', socket); // Check if socket is undefined
 
     const userID = window.location.href.split('?')[1].split('=')[1];
+    const userID2 = getCurrentUser();
 
-    const opener = { type: 'chatOpen', userID1: userID, message: 'open' };
+    const opener = { type: 'chatOpen', userID1: userID, userID2:  userID2 ,message: 'open' };
     console.log(opener);
     if (socket) {
         socket.send(JSON.stringify(opener));
@@ -97,3 +98,7 @@ function createMessageElement({ FromUserID, Content, CreatedAt }) {
     return messageElement;
 }
 
+function getCurrentUser() {
+    const userID = localStorage.getItem('currID')
+    return userID;
+}   
