@@ -44,7 +44,6 @@ type ChatPayload struct {
 	Type        string `json:"type"`
 	SenderID    int    `json:"senderID"`
 	RecipientID int    `json:"recipientID"`
-	Content     string `json:"message"`
 }
 
 type LoadMessages struct {
@@ -57,64 +56,6 @@ func makeSocketManager() *socketsManager {
 	return &socketsManager{
 		socketCounter: atomic.Uint64{},
 		sockets:       make(map[uint64]userSocket),
-	}
-}
-
-func (s *server) LastMessage(conn *websocket.Conn) {
-	_, message, err := conn.ReadMessage()
-	if err != nil {
-		log.Printf("Error reading WebSocket message: %v", err)
-		return
-	}
-
-	var load Load
-	if err := json.Unmarshal(message, &load); err != nil {
-		log.Printf("Error unmarshaling message: %v", err)
-		return
-	}
-
-	log.Printf("Unmarshaled Load: %+v", load)
-
-	userID1, err := strconv.Atoi(load.UserID1)
-	if err != nil {
-		log.Printf("Error converting userID1 to int: %v", err)
-		return
-	}
-	userID2, err := strconv.Atoi(load.UserID2)
-	if err != nil {
-		log.Printf("Error converting userID2 to int: %v", err)
-		return
-	}
-
-	log.Printf("userID1: %d, userID2: %d", userID1, userID2)
-
-	messages, err := backend.GetLastMessages(s.db, userID1, userID2, 10)
-	if err != nil {
-		log.Printf("Error fetching last messages: %v", err)
-		return
-	}
-
-	var convertedMessages []LoadMessages
-	for _, msg := range messages {
-		convertedMessages = append(convertedMessages, LoadMessages{
-			Username:  msg.Username,
-			Content:   msg.Content,
-			CreatedAt: msg.CreatedAt,
-		})
-	}
-
-	log.Println("All messages:", convertedMessages)
-
-	response := struct {
-		Type     string         `json:"type"`
-		Messages []LoadMessages `json:"messages"`
-	}{
-		Type:     "oldMessages",
-		Messages: convertedMessages,
-	}
-
-	if err := conn.WriteJSON(response); err != nil {
-		log.Printf("Error sending last messages: %v", err)
 	}
 }
 
@@ -213,6 +154,7 @@ func (s *server) SendMessage(conn *websocket.Conn, userID int) {
 		log.Printf("Error unmarshaling message: %v", err)
 		return
 	}
+	//add user id to the message
 	chatMessage.From = userID
 	err = backend.SaveMessage(s.db, chatMessage.Message, chatMessage.To, userID)
 	if err != nil {
@@ -254,8 +196,8 @@ func (s *server) LastMessage(conn *websocket.Conn, userID int) {
 	log.Println("All messages:", convertedMessages)
 
 	data := map[string]interface{}{
-		"type":     "onlineUsers",
-		"Messages": convertedMessages,
+		"type":     "oldMessages",
+		"messages": convertedMessages,
 	}
 	/*
 		response := struct {
