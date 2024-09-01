@@ -29,6 +29,10 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+type ChatType struct {
+	Type string `json:"type"`
+}
+
 type ChatMessage struct {
 	Type    string `json:"type"`
 	From    int    `json:"from"`
@@ -36,12 +40,12 @@ type ChatMessage struct {
 	Message string `json:"message"`
 }
 
-/*type Load struct {
-	Type    string `json:"type"`
-	userID1 int    `json:"userID1"`
-	userID2 int    `json:"userID2"`
-	Content string `json:"message"`
-}*/
+type ChatPayload struct {
+	Type        string `json:"type"`
+	SenderID    int    `json:"senderID"`
+	RecipientID int    `json:"recipientID"`
+	Content     string `json:"message"`
+}
 
 type LoadMessages struct {
 	Username  string    `json:"username"`
@@ -56,67 +60,9 @@ func makeSocketManager() *socketsManager {
 	}
 }
 
-// func (s *server) LastMessage(conn *websocket.Conn) {
-// 	_, message, err := conn.ReadMessage()
-// 	if err != nil {
-// 		log.Printf("Error reading WebSocket message: %v", err)
-// 		return
-// 	}
-
-// 	var load Load
-// 	if err := json.Unmarshal(message, &load); err != nil {
-// 		log.Printf("Error unmarshaling message: %v", err)
-// 		return
-// 	}
-
-// 	// Convert userID1 and userID2 to integers
-// 	userID1, err := strconv.Atoi(load.UserID1)
-// 	if err != nil {
-// 		log.Printf("Error converting userID1 to integer: %v", err)
-// 		return
-// 	}
-
-// 	userID2, err := strconv.Atoi(load.UserID2)
-// 	if err != nil {
-// 		log.Printf("Error converting userID2 to integer: %v", err)
-// 		return
-// 	}
-
-// 	log.Printf("userID1: %d, userID2: %d", userID1, userID2)
-
-// 	messages, err := backend.GetLastMessages(s.db, userID1, userID2, 10)
-// 	if err != nil {
-// 		log.Printf("Error fetching last messages: %v", err)
-// 		return
-// 	}
-
-// 	var convertedMessages []LoadMessages
-// 	for _, msg := range messages {
-// 		convertedMessages = append(convertedMessages, LoadMessages{
-// 			Username:  msg.Username,
-// 			Content:   msg.Content,
-// 			CreatedAt: msg.CreatedAt,
-// 		})
-// 	}
-
-// 	log.Println("All messages:", convertedMessages)
-
-// 	response := struct {
-// 		Type     string         `json:"type"`
-// 		Messages []LoadMessages `json:"messages"`
-// 	}{
-// 		Type:     "oldMessages",
-// 		Messages: convertedMessages,
-// 	}
-
-// 	if err := conn.WriteJSON(response); err != nil {
-// 		log.Printf("Error sending last messages: %v", err)
-// 	}
-// }
-
 func (s *server) handleMessages(conn *websocket.Conn, userID int) {
 	for {
-		var chatMessage ChatMessage
+		var chat ChatType
 		log.Println("Waiting for message...")
 
 		_, message, err := conn.ReadMessage()
@@ -125,28 +71,26 @@ func (s *server) handleMessages(conn *websocket.Conn, userID int) {
 			log.Printf("Error reading WebSocket message: %v", err)
 			break
 		}
-
 		log.Printf("Received message: %s", message)
 
-		if err := json.Unmarshal(message, &chatMessage); err != nil {
+		if err := json.Unmarshal(message, &chat); err != nil {
 			log.Printf("Error unmarshaling message: %v", err)
 			continue
 		}
 
-		log.Printf("Parsed message: %+v", chatMessage)
+		log.Printf("Parsed message: %+v", chat)
 
-		chatMessage.From = userID
-
-		err = backend.SaveMessage(s.db, chatMessage.Message, chatMessage.To, userID)
-		if err != nil {
-			log.Printf("Error saving message: %v", err)
-			continue
+		switch chat.Type {
+		case "chatOpen":
+			s.LastMessage(conn, userID)
+			break
+		case "chat":
+			s.SendMessage(conn, userID)
+			break
+		default:
+			log.Printf("Unknown message type: %s", chat.Type)
 		}
 
-		log.Println("Message saved successfully")
-
-		s.forwardMessage(chatMessage)
-		log.Println("Message forwarded, ready for the next message.")
 	}
 
 	log.Println("Connection closed or error occurred, exiting message handling loop.")
@@ -197,5 +141,74 @@ func (s *server) removeConnection(connectionId uint64) {
 		}
 	} else {
 		log.Printf("Attempted to remove non-existent or already closed connection ID %d", connectionId)
+	}
+}
+
+func (s *server) SendMessage(conn *websocket.Conn, userID int) {
+	var chatMessage ChatMessage
+	_, message, err := conn.ReadMessage()
+	if err != nil {
+		log.Printf("Error reading WebSocket message: %v", err)
+		return
+	}
+	if err := json.Unmarshal(message, &chatMessage); err != nil {
+		log.Printf("Error unmarshaling message: %v", err)
+		return
+	}
+	chatMessage.From = userID
+	err = backend.SaveMessage(s.db, chatMessage.Message, chatMessage.To, userID)
+	if err != nil {
+		log.Printf("Error saving message: %v", err)
+		return
+	}
+	log.Println("Message saved successfully")
+
+	s.forwardMessage(chatMessage)
+	log.Println("Message forwarded, ready for the next message.")
+}
+
+func (s *server) LastMessage(conn *websocket.Conn, userID int) {
+	_, message, err := conn.ReadMessage()
+	if err != nil {
+		log.Printf("Error reading WebSocket message: %v", err)
+		return
+	}
+	var load ChatPayload
+	if err := json.Unmarshal(message, &load); err != nil {
+		log.Printf("Error unmarshaling message: %v", err)
+		return
+	}
+	load.SenderID = userID
+	log.Printf("Sender: %d, Recipit: %d", load.SenderID, load.RecipientID)
+	messages, err := backend.GetLastMessages(s.db, load.SenderID, load.RecipientID, 10)
+	if err != nil {
+		log.Printf("Error fetching last messages: %v", err)
+		return
+	}
+	var convertedMessages []LoadMessages
+	for _, msg := range messages {
+		convertedMessages = append(convertedMessages, LoadMessages{
+			Username:  msg.Username,
+			Content:   msg.Content,
+			CreatedAt: msg.CreatedAt,
+		})
+	}
+	log.Println("All messages:", convertedMessages)
+
+	data := map[string]interface{}{
+		"type":     "onlineUsers",
+		"Messages": convertedMessages,
+	}
+	/*
+		response := struct {
+			Type     string         `json:"type"`
+			Messages []LoadMessages `json:"messages"`
+		}{
+			Type:     "oldMessages",
+			Messages: convertedMessages,
+		}*/
+
+	if err := conn.WriteJSON(data); err != nil {
+		log.Printf("Error sending last messages: %v", err)
 	}
 }

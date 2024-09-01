@@ -28,12 +28,8 @@ export function chatPage() {
 }
 
 export function openChat() {
-    console.log('Socket:', socket); // Check if socket is undefined
-
     const userID = window.location.href.split('?')[1].split('=')[1];
-
-    const opener = { type: 'chatOpen', userID1: userID, message: 'open' };
-    console.log(opener);
+    const opener = { type: 'chatOpen', RecipientID: userID, message: 'open' };
     if (socket) {
         socket.send(JSON.stringify(opener));
     } else {

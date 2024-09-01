@@ -38,9 +38,6 @@ export function setupWebSocket() {
             case 'error':
                 showError(data.message);
                 break;
-            case 'error':
-                showError(data.message);
-                break;
             default:
                 console.log('Unknown message type:', data.type);
         }

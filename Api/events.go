@@ -29,8 +29,6 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 	// Send the list of online users to the new connection
 	s.sendOnlineUsers(userID)
 
-	// s.LastMessage(conn)
-
 	// inside it infinite loop to handle messages and keep connection alive
 	s.handleMessages(conn, userID)
 

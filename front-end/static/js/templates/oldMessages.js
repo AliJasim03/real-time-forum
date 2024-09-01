@@ -1,4 +1,5 @@
 export function loadOldMessages(data) {
+    debugger;
     console.log("Received data:", data);
 
     // Ensure the `data.messages` exists and is an array
