@@ -8,7 +8,7 @@ export function chatPage() {
         <div class="container">
             <div class="card mt-5">
                 <div class="card-header text-center">
-                    <h2 id="recipient-name">Chat with: ${username}</h2>
+                    <h2 id="recipient-name">Chat with: <span id="active-username">${username}</span></h2>
                 </div>
                 <div class="card-body">
                     <div id="chat-messages" class="mb-3" style="height: 50vh; overflow-y: auto;"></div>

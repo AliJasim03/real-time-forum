@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
 
@@ -24,17 +25,14 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	connectionId := s.eventManager.addConnection(conn, userID)
-
-	// Send the list of online users to the new connection
-	s.sendOnlineUsers(userID)
+	s.eventManager.addConnection(conn, userID)
 
 	// inside it infinite loop to handle messages and keep connection alive
 	s.handleMessages(conn, userID)
 
 	// Broadcast the list of online users after a connection is removed
 	log.Println("Broadcast the list of online users after connection removal.")
-	s.removeConnection(connectionId)
+	s.removeConnection(userID)
 	s.sendOfflineUser(userID)
 }
 
@@ -65,7 +63,7 @@ func (s *server) forwardMessage(chatMessage ChatMessage) {
 	s.eventManager.lock.Unlock()
 }
 
-func (s *server) sendOnlineUsers(userID int) {
+func (s *server) sendOnlineUsers(conn *websocket.Conn, userID int) {
 	onlineUsersChan := backend.GetOnlineUsersAsync(s.db, userID)
 
 	// Use the result when it's ready
@@ -75,7 +73,6 @@ func (s *server) sendOnlineUsers(userID int) {
 		for _, socket := range s.eventManager.sockets {
 			if socket.userId == onlineUsers[i].ID {
 				onlineUsers[i].IsOnline = true
-				break
 			}
 		}
 	}
@@ -90,7 +87,7 @@ func (s *server) sendOnlineUsers(userID int) {
 		"user": userID,
 	}
 
-	s.sendEventToUser(data, userID)
+	s.sendEventToUser(conn, data)
 	s.sendEventToAll(newUser, userID)
 }
 
@@ -102,19 +99,14 @@ func (s *server) sendOfflineUser(userID int) {
 	s.sendEventToAll(data, userID)
 }
 
-func (s *server) sendEventToUser(data interface{}, userID int) {
+func (s *server) sendEventToUser(conn *websocket.Conn, data interface{}) {
 	s.eventManager.lock.Lock()
 	defer s.eventManager.lock.Unlock()
 
-	for _, socket := range s.eventManager.sockets {
-		if socket.connection != nil && !socket.closed.Load() && socket.userId == userID {
-			err := socket.connection.WriteJSON(data)
-			if err != nil {
-				log.Printf("Error sending event to user %d: %v", userID, err)
-			}
-			break
-		}
+	if err := conn.WriteJSON(data); err != nil {
+		log.Printf("Error sending last messages: %v", err)
 	}
+
 }
 
 // sent to all except the user
@@ -132,42 +124,3 @@ func (s *server) sendEventToAll(data interface{}, userID int) {
 		}
 	}
 }
-
-func (s *server) sendEvents(data interface{}) {
-	s.eventManager.lock.Lock()
-	defer s.eventManager.lock.Unlock()
-
-	for _, socket := range s.eventManager.sockets {
-		if socket.connection != nil && !socket.closed.Load() {
-			socket.connection.WriteJSON(data)
-		}
-	}
-}
-
-// func (s *server) broadcastOnlineUsers(userID int) {
-// 	onlineUsers := s.getOnlineUsers(userID)
-// 	data := map[string]interface{}{
-// 		"type":  "onlineUsers",
-// 		"users": onlineUsers,
-// 	}
-// 	s.sendToAll(data)
-// }
-
-/*type pingEvent struct {
-	EventType string `json:"type"` // ping
-	Count     int    `json:"count"`
-}
-
-func (s *server) SendPings() {
-	event := pingEvent{
-		EventType: "ping",
-		Count:     0,
-	}
-
-	for {
-		s.sendEvents(event)
-
-		event.Count++
-		time.Sleep(10 * time.Second)
-	}
-}*/
