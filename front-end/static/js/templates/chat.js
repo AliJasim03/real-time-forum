@@ -23,24 +23,18 @@ export function chatPage() {
         </div>
     `);
 
-    const throttledOpenChat = throttle(() => openChat(offset), 100);
     $('#send-message').on('click', () => sendMessage());
-    $('#chat-messages').on('scroll', function() {
-        const chatContainer = $(this);
-        if (chatContainer.scrollTop() === 0) {
-            scrollTop(throttledOpenChat);
-        }
-    });
+    $('#chat-messages').on('scroll', () => scrollTop());
+
     openChat(offset);
 }
 
-function scrollTop(throttledOpenChat){
-    debugger
+function scrollTop(){
     const chatContainer = $('#chat-messages');
     if (chatContainer.scrollTop() === 0) {
         console.log("Scrolled to the top!");
         offset += 10;
-        throttledOpenChat();
+        throttle(() => openChat(offset), 100);
     }
 }
 
