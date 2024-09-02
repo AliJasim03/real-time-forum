@@ -7,10 +7,47 @@
 
 }
 
-
 .custom-hover-like {
     background-color: #28a745;
     /* Bootstrap success color */
     color: white;
     border-color: #28a745;
+}
+.chat-message {
+    display: block; /* Ensure each message takes up the full width available */
+    max-width: 80%; /* Maximum width the bubble can grow to */
+    width: fit-content;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background-color: #e0f7fa; /* Background color for the sender */
+    position: relative;
+    clear: both;
+    word-wrap: break-word; /* Ensures long words break to fit within the max-width */
+    overflow-wrap: break-word; /* Ensure that long words are wrapped correctly */
+}
+
+.chat-message.recipient {
+    background-color: #f1f1f1; /* Background color for the recipient */
+    margin-left: auto; /* Align recipient's message to the right */
+    text-align: left; /* Align text within the bubble to the left */
+}
+.message-header{
+    gap: 1.5em;
+}
+.chat-message .message-header {
+    display: flex;
+    justify-content: space-between; /* Align "From" on the left and time on the right */
+    align-items: center;
+    font-weight: bold;
+    color: #666; /* Adjust color for the time */
+    margin-bottom: 5px;
+}
+
+.chat-message .message-body {
+    white-space: pre-wrap; /* Preserves white spaces and wraps text */
+    word-wrap: break-word; /* Ensures long words break to fit within the max-width */
+    font-size: 1em;
+    color: #333;
 }

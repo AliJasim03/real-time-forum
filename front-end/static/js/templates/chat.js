@@ -10,9 +10,9 @@ export function chatPage() {
                 <div class="card-header text-center">
                     <h2 id="recipient-name">Chat with: <span id="active-username">${username}</span></h2>
                 </div>
-                <div class="card-body">
-                    <div id="chat-messages" class="mb-3" style="height: 50vh; overflow-y: auto;"></div>
-                    <div class="input-group">
+                <div class="card-body p-0">
+                    <div id="chat-messages" class="mb-3 p-3" style="height: 50vh; overflow-y: auto;"></div>
+                    <div class="input-group p-3">
                         <input type="text" id="message-input" class="form-control" placeholder="Type your message...">
                         <button class="btn btn-primary" id="send-message">Send</button>
                     </div>
@@ -21,9 +21,9 @@ export function chatPage() {
         </div>
     `);
 
-    openChat();
-
     $('#send-message').on('click', () => sendMessage());
+
+    openChat();
 }
 
 export function openChat() {
@@ -92,6 +92,7 @@ export function handleChatMessage(data) {
 
 function displayNewMessage(fromUserID, content) {
     console.log("Displaying message from:", fromUserID);
+    const randomBoolean = Math.random() >= 0.5;
     const chatContainer = document.getElementById('chat-messages');
     const messageElement = createMessageElement({
         FromUserID: 'HIM',
@@ -103,36 +104,44 @@ function displayNewMessage(fromUserID, content) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-function createMessageElement({ From, Message, CreatedAt }) {
+function createMessageElement({ From, Message, CreatedAt, IsSender }) {
     const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message', 'border', 'rounded', 'p-2', 'text-end');
+    messageDiv.classList.add('chat-message');
 
-    const fromDiv = document.createElement('div');
-    fromDiv.classList.add('fw-bold', 'text-success');
-    fromDiv.textContent = `From: ${From}`;
-    messageDiv.appendChild(fromDiv);
+    const headerDiv = document.createElement('div');
+    headerDiv.classList.add('message-header');
 
-    const contentP = document.createElement('p');
-    contentP.classList.add('mb-1');
-    contentP.textContent = Message;
-    messageDiv.appendChild(contentP);
+    // Add 'recipient' class for recipient messages
+    if (!IsSender) {
+        messageDiv.classList.add('recipient');
+
+        const fromSpan = document.createElement('span');
+        fromSpan.textContent = `From: ${From}`;
+        headerDiv.appendChild(fromSpan);
+    }
 
     const timeSpan = document.createElement('span');
-    timeSpan.classList.add('message-time', 'small', 'text-muted');
     if (CreatedAt) {
         const date = new Date(CreatedAt);
         timeSpan.textContent = !isNaN(date.getTime()) ? date.toLocaleTimeString() : 'Invalid timestamp';
+        timeSpan.classList.add('text-muted', 'small');
     } else {
         timeSpan.textContent = 'No timestamp';
     }
-    messageDiv.appendChild(timeSpan);
+    headerDiv.appendChild(timeSpan); // Append time to the right of the header
+
+    messageDiv.appendChild(headerDiv);
+
+    const contentP = document.createElement('div');
+    contentP.classList.add('message-body');
+    contentP.textContent = Message;
+    messageDiv.appendChild(contentP);
 
     return messageDiv;
 }
 
 
 export function loadOldMessages(data) {
-    debugger;
     console.log("Received data:", data);
 
     // Ensure the `data.messages` exists and is an array
@@ -143,11 +152,12 @@ export function loadOldMessages(data) {
         data.messages.forEach((messageData, index) => {
             // Debug each message data
             console.log(`Message ${index}:`, messageData);
-
+            const randomBoolean = Math.random() >= 0.5;
             const messageElement = createMessageElement({
                 From: messageData.username || 'Unknown', // Default to 'Unknown' if username is missing
                 Message: messageData.content || 'No content', // Default to 'No content' if message is missing
-                CreatedAt: messageData.created_at || null // Default to null if timestamp is missing
+                CreatedAt: messageData.created_at || null, // Default to null if timestamp is missing
+                IsSender: randomBoolean
             });
             chatContainer.appendChild(messageElement);
         });
