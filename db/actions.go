@@ -526,18 +526,18 @@ func SaveMessage(db *sql.DB, content string, receiverID int, fromUserID int) err
 	return nil
 }
 
-func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int) ([]LoadMessages, error) {
+func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int, offset int) ([]LoadMessages, error) {
 	query := `
         SELECT U.username, M.content, M.created_at
         FROM messages M
         JOIN users U ON M.from_user_id = U.id
-        WHERE (M.from_user_id = ? AND M.to_user_id = ?) 
+        WHERE (M.from_user_id = ? AND M.to_user_id = ?)
            OR (M.from_user_id = ? AND M.to_user_id = ?)
         ORDER BY M.created_at DESC
-        LIMIT ?
+        LIMIT ? OFFSET ?
     `
 
-	rows, err := db.Query(query, userID1, userID2, userID2, userID1, limit)
+	rows, err := db.Query(query, userID1, userID2, userID2, userID1, limit, offset)
 	if err != nil {
 		return nil, err
 	}

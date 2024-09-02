@@ -45,6 +45,7 @@ type ChatPayload struct {
 	Type        string `json:"type"`
 	SenderID    int    `json:"senderID"`
 	RecipientID int    `json:"recipientID"`
+	Offset      int    `json:"offset"`
 }
 
 type LoadMessages struct {
@@ -184,12 +185,14 @@ func (s *server) LastMessage(conn *websocket.Conn, userID int) {
 		return
 	}
 	load.SenderID = userID
-	log.Printf("Sender: %d, Recipit: %d", load.SenderID, load.RecipientID)
-	messages, err := backend.GetLastMessages(s.db, load.SenderID, load.RecipientID, 10)
+	log.Printf("Sender: %d, Recipient: %d, Offset: %d", load.SenderID, load.RecipientID, load.Offset)
+
+	messages, err := backend.GetLastMessages(s.db, load.SenderID, load.RecipientID, 10, load.Offset)
 	if err != nil {
 		log.Printf("Error fetching last messages: %v", err)
 		return
 	}
+
 	var convertedMessages []LoadMessages
 	for _, msg := range messages {
 		convertedMessages = append(convertedMessages, LoadMessages{

@@ -21,12 +21,24 @@ export function chatPage() {
         </div>
     `);
 
-    $('#send-message').on('click', () => sendMessage());
+    openChat(offset);
+    const throttledOpenChat = throttle(() => openChat(offset), 100);
 
-    openChat();
+    $('#send-message').on('click', () => sendMessage());
+    $('#chat-messages').on('scroll', () => scrollTop(throttledOpenChat));
 }
 
-export function openChat() {
+let offset = 0; //should change
+function scrollTop(throttledOpenChat){
+    const chatContainer = $('#chat-messages');
+    if (chatContainer.scrollTop() === 0) {
+        console.log("Scrolled to the top!");
+        offset += 10;
+        throttledOpenChat();
+    }
+}
+
+export function openChat(offset) {
     const userID = window.location.href.split('?')[1].split('=')[1];
 
     //parse the userID to an integer
@@ -35,7 +47,8 @@ export function openChat() {
         alert('User ID is missing');
         return;
     }
-    const opener = { type: 'chatOpen', RecipientID: userId_Parsed};
+
+    const opener = { type: 'chatOpen', RecipientID: userId_Parsed, Offset: offset};
     if (socket) {
         socket.send(JSON.stringify(opener));
     } else {
@@ -142,6 +155,7 @@ function createMessageElement({ From, Message, CreatedAt, IsSender }) {
 
 
 export function loadOldMessages(data) {
+    debugger;
     console.log("Received data:", data);
 
     // Ensure the `data.messages` exists and is an array
@@ -169,7 +183,19 @@ export function loadOldMessages(data) {
     }
 }
 
+const throttle = (fn, delay) => {
+    let time = Date.now();
 
+    // Here's our logic
+    return () => {
+      if((time + delay - Date.now()) <= 0) {
+        // Run the function we've passed to our throttler,
+        // and reset the `time` variable (so we can check again).
+        fn();
+        time = Date.now();
+      }
+    }
+  }
 
 /*function createMessageElement({ FromUserID, Content, CreatedAt }) {
     const messageElement = document.createElement('div');
