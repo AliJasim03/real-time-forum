@@ -1,4 +1,5 @@
 import { checkAuth, navigate } from '../app.js';
+import {socket} from "../socket.js";
 
 // Update the list of online users in the DOM
 export function populateOnlineUserList(users) {
@@ -33,6 +34,17 @@ export function populateOnlineUserList(users) {
         userItem.appendChild(userLink);
         userList.append(userItem);
     });
+
+    //check if the user is on the chat page and update the name of the page
+    // please forgive me ofr this stupid approach :)
+    debugger;
+    const username = $('#active-username');
+    if (!username.val()) {
+        const userID = window.location.href.split('?')[1].split('=')[1];
+        const user = $('#user-link-' + userID).text();
+        username.text(user);
+    }
+
 }
 
 
@@ -52,4 +64,14 @@ export function updateOfflineUser(userId){
         userLink.nextElementSibling.className = 'badge bg-secondary';
     }
 }
+
+
+export function requestOnlineUsers() {
+
+    const message = {
+        type: 'onlineUsers'
+    };
+    socket.send(JSON.stringify(message));
+}
+
 

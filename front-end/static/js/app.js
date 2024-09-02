@@ -168,8 +168,8 @@ $(document).ready(async function () {
     await checkAuth();
     if (isLoggedIn) {
         // Initialize the view
+        await setupWebSocket(); // Call the function to set up the WebSocket connection
         updateView(window.location.pathname);
-        setupWebSocket(); // Call the function to set up the WebSocket connection
         $('#user-col').removeClass('d-none');
     } else {
         // redirect to login page

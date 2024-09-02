@@ -13,15 +13,16 @@ import (
 )
 
 type socketsManager struct {
-	sockets       map[uint64]userSocket
+	sockets       map[int]userSocket
 	socketCounter atomic.Uint64
 	lock          sync.Mutex
 }
 
 type userSocket struct {
-	connection *websocket.Conn
-	userId     int
-	closed     *atomic.Bool
+	connection   *websocket.Conn
+	userId       int
+	connectionId uint64
+	closed       *atomic.Bool
 }
 
 var upgrader = websocket.Upgrader{
@@ -56,7 +57,7 @@ type LoadMessages struct {
 func makeSocketManager() *socketsManager {
 	return &socketsManager{
 		socketCounter: atomic.Uint64{},
-		sockets:       make(map[uint64]userSocket),
+		sockets:       make(map[int]userSocket),
 	}
 }
 
@@ -81,6 +82,9 @@ func (s *server) handleMessages(conn *websocket.Conn, userID int) {
 		log.Printf("Parsed message: %+v", chat)
 
 		switch chat.Type {
+		case "onlineUsers":
+			s.sendOnlineUsers(conn, userID)
+			break
 		case "chatOpen":
 			s.LastMessage(conn, userID)
 			break
@@ -102,10 +106,11 @@ func (e *socketsManager) addConnection(conn *websocket.Conn, userId int) uint64 
 	e.lock.Lock()
 	defer e.lock.Unlock()
 
-	e.sockets[connectionId] = userSocket{
-		connection: conn,
-		userId:     userId,
-		closed:     &atomic.Bool{},
+	e.sockets[userId] = userSocket{
+		connection:   conn,
+		userId:       userId,
+		connectionId: connectionId,
+		closed:       &atomic.Bool{},
 	}
 
 	return connectionId
@@ -127,20 +132,20 @@ func (s *server) removeConnectionByUserId(userId int) {
 	log.Printf("No active connection found for user %s", userId)
 }
 
-func (s *server) removeConnection(connectionId uint64) {
+func (s *server) removeConnection(userId int) {
 	e := s.eventManager
 	e.lock.Lock()
 	defer e.lock.Unlock()
 
-	if socket, exists := e.sockets[connectionId]; exists && !socket.closed.Load() {
+	if socket, exists := e.sockets[userId]; exists && !socket.closed.Load() {
 		socket.closed.Store(true)
-		delete(e.sockets, connectionId)
-		log.Printf("Connection ID %d removed for user %s", connectionId, socket.userId)
+		delete(e.sockets, userId)
+		log.Printf("Connection ID %d removed for user %s", userId, socket.userId)
 		if err := socket.connection.Close(); err != nil {
 			log.Printf("Error closing WebSocket connection: %v", err)
 		}
 	} else {
-		log.Printf("Attempted to remove non-existent or already closed connection ID %d", connectionId)
+		log.Printf("Attempted to remove non-existent or already closed user ID %d", userId)
 	}
 }
 
