@@ -1,5 +1,7 @@
 import { socket } from '../socket.js';
 
+let offset = 0;
+
 export function chatPage() {
     const app = $('#app');
     const userID = window.location.href.split('?')[1].split('=')[1];
@@ -11,8 +13,8 @@ export function chatPage() {
                     <h2 id="recipient-name">Chat with: <span id="active-username">${username}</span></h2>
                 </div>
                 <div class="card-body p-0">
-                    <div id="chat-messages" class="mb-3 p-3" style="height: 50vh; overflow-y: auto;"></div>
-                    <div class="input-group p-3">
+                    <div id="chat-messages" class="p-3 pb-1" style="height: 50vh; overflow-y: auto;"></div>
+                    <div class="input-group p-3 pt-0">
                         <input type="text" id="message-input" class="form-control" placeholder="Type your message...">
                         <button class="btn btn-primary" id="send-message">Send</button>
                     </div>
@@ -21,15 +23,19 @@ export function chatPage() {
         </div>
     `);
 
-    openChat(offset);
     const throttledOpenChat = throttle(() => openChat(offset), 100);
-
     $('#send-message').on('click', () => sendMessage());
-    $('#chat-messages').on('scroll', () => scrollTop(throttledOpenChat));
+    $('#chat-messages').on('scroll', function() {
+        const chatContainer = $(this);
+        if (chatContainer.scrollTop() === 0) {
+            scrollTop(throttledOpenChat);
+        }
+    });
+    openChat(offset);
 }
 
-let offset = 0; //should change
 function scrollTop(throttledOpenChat){
+    debugger
     const chatContainer = $('#chat-messages');
     if (chatContainer.scrollTop() === 0) {
         console.log("Scrolled to the top!");
@@ -38,7 +44,7 @@ function scrollTop(throttledOpenChat){
     }
 }
 
-export function openChat(offset) {
+function openChat(offset) {
     const userID = window.location.href.split('?')[1].split('=')[1];
 
     //parse the userID to an integer
@@ -155,7 +161,6 @@ function createMessageElement({ From, Message, CreatedAt, IsSender }) {
 
 
 export function loadOldMessages(data) {
-    debugger;
     console.log("Received data:", data);
 
     // Ensure the `data.messages` exists and is an array
