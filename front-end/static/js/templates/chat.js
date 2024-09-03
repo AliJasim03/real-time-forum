@@ -1,16 +1,17 @@
-import {socket} from '../socket.js';
+import { socket } from '../socket.js';
 
 var offset = 0;
+var currentUsername; // Variable to store the current username
 
 export function chatPage() {
     const app = $('#app');
     const userID = window.location.href.split('?')[1].split('=')[1];
-    const username = $('#user-link-' + userID).text();
+    currentUsername = $('#user-link-' + userID).text(); // Store current username
     app.html(`
         <div class="container">
             <div class="card mt-5">
                 <div class="card-header text-center">
-                    <h2 id="recipient-name">Chat with: <span id="active-username">${username}</span></h2>
+                    <h2 id="recipient-name">Chat with: <span id="active-username">${currentUsername}</span></h2>
                 </div>
                 <div class="card-body p-0">
                     <div id="chat-messages" class="p-3 pb-1" style="height: 50vh; overflow-y: auto;"></div>
@@ -32,7 +33,6 @@ export function chatPage() {
 function scrollTop() {
     const chatContainer = $('#chat-messages');
     if (chatContainer.scrollTop() === 0) {
-        debugger;
         console.log("Scrolled to the top!");
         offset += 10;
         const throttledOpenChat = throttle(() => openChat(), 100);
@@ -42,14 +42,14 @@ function scrollTop() {
 
 export function openChat() {
     const userID = window.location.href.split('?')[1].split('=')[1];
-
-    //parse the userID to an integer
     let userId_Parsed = parseInt(userID);
+
     if (userID === undefined || userID === '' || isNaN(userId_Parsed)) {
         alert('User ID is missing');
         return;
     }
-    const opener = {type: 'chatOpen', RecipientID: userId_Parsed, Offset: offset};
+    
+    const opener = { type: 'chatOpen', RecipientID: userId_Parsed, Offset: offset };
     if (socket) {
         socket.send(JSON.stringify(opener));
     } else {
@@ -60,6 +60,7 @@ export function openChat() {
 function sendMessage() {
     const userID = window.location.href.split('?')[1].split('=')[1];
     const message = $('#message-input').val();
+
     if (userID === undefined || userID === '') {
         alert('User ID is missing');
         return;
@@ -67,7 +68,7 @@ function sendMessage() {
 
     if (message.trim() !== '') {
         let userId_Parsed = parseInt(userID);
-        const chatMessage = {type: 'chat', to: userId_Parsed, message: message};
+        const chatMessage = { type: 'chat', to: userId_Parsed, message: message };
         yourMessages(message);
         socket.send(JSON.stringify(chatMessage));
         $('#message-input').val('');
@@ -77,22 +78,21 @@ function sendMessage() {
 function yourMessages(message) {
     const now = new Date();
     const time = now.toLocaleTimeString();
-    const myID = 'YOU';
-    const yourMessage = message;
 
     const chatContainer = document.getElementById('chat-messages');
     const messageElement = createMessageElement({
-        From: myID,
-        Message: yourMessage,
-        CreatedAt: time
+        From: currentUsername,
+        Message: message,
+        CreatedAt: now.toISOString(), // Use ISO format for consistency
+        IsSender: true
     });
 
     chatContainer.appendChild(messageElement);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-
-// Function to send a message to the server
 export function handleChatMessage(data) {
+    console.log("Received data:", data);
     try {
         if (data !== null && typeof data === 'object') {
             displayNewMessage(data.from, data.message, data.Username);
@@ -104,31 +104,29 @@ export function handleChatMessage(data) {
     }
 }
 
-function displayNewMessage(fromUserID, content) {
+function displayNewMessage(fromUserID, content, fromUsername) {
     console.log("Displaying message from:", fromUserID);
-    const randomBoolean = Math.random() >= 0.5;
     const chatContainer = document.getElementById('chat-messages');
     const messageElement = createMessageElement({
-        FromUserID: 'HIM',
-        Content: content,
-        CreatedAt: new Date().toISOString()
+        From: fromUsername,
+        Message: content,
+        CreatedAt: new Date().toISOString(), // Use ISO format for consistency
+        IsSender: fromUsername === currentUsername // Determine if the message is from the current user
     });
 
     chatContainer.appendChild(messageElement);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-function createMessageElement({From, Message, CreatedAt, IsSender}) {
+function createMessageElement({ From, Message, CreatedAt, IsSender }) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('chat-message');
+    messageDiv.classList.add(IsSender ? 'sender' : 'recipient');
 
     const headerDiv = document.createElement('div');
     headerDiv.classList.add('message-header');
 
-    // Add 'recipient' class for recipient messages
     if (!IsSender) {
-        messageDiv.classList.add('recipient');
-
         const fromSpan = document.createElement('span');
         fromSpan.textContent = `From: ${From}`;
         headerDiv.appendChild(fromSpan);
@@ -142,7 +140,7 @@ function createMessageElement({From, Message, CreatedAt, IsSender}) {
     } else {
         timeSpan.textContent = 'No timestamp';
     }
-    headerDiv.appendChild(timeSpan); // Append time to the right of the header
+    headerDiv.appendChild(timeSpan);
 
     messageDiv.appendChild(headerDiv);
 
@@ -154,29 +152,25 @@ function createMessageElement({From, Message, CreatedAt, IsSender}) {
     return messageDiv;
 }
 
-
 export function loadOldMessages(data) {
     console.log("Received data:", data);
 
-    // Ensure the `data.messages` exists and is an array
     if (data && Array.isArray(data.messages)) {
         const chatContainer = document.getElementById('chat-messages');
-        chatContainer.innerHTML = ''; // Clear existing messages if needed
+        const fragment = document.createDocumentFragment();
 
         data.messages.forEach((messageData, index) => {
-            // Debug each message data
             console.log(`Message ${index}:`, messageData);
-            const randomBoolean = Math.random() >= 0.5;
             const messageElement = createMessageElement({
-                From: messageData.username || 'Unknown', // Default to 'Unknown' if username is missing
-                Message: messageData.content || 'No content', // Default to 'No content' if message is missing
-                CreatedAt: messageData.created_at || null, // Default to null if timestamp is missing
-                IsSender: randomBoolean
+                From: messageData.username || 'Unknown',
+                Message: messageData.content || 'No content',
+                CreatedAt: messageData.created_at || null, // Ensure this field is properly formatted
+                IsSender: messageData.username === currentUsername // Determine if the message is from the current user
             });
-            chatContainer.appendChild(messageElement);
+            fragment.prepend(messageElement); // Prepend old messages to the top
         });
 
-        // Scroll to the bottom to show the latest message
+        chatContainer.prepend(fragment);
         chatContainer.scrollTop = chatContainer.scrollHeight;
     } else {
         console.log("No messages to display or invalid data format.");
@@ -184,15 +178,13 @@ export function loadOldMessages(data) {
 }
 
 const throttle = (fn, delay) => {
-    let time = Date.now();
+    let lastCall = 0;
 
-    // Here's our logic
     return () => {
-        if ((time + delay - Date.now()) <= 0) {
-            // Run the function we've passed to our throttler,
-            // and reset the `time` variable (so we can check again).
+        const now = Date.now();
+        if (now - lastCall >= delay) {
             fn();
-            time = Date.now();
+            lastCall = now;
         }
     }
 }

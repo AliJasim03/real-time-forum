@@ -1,5 +1,6 @@
 import * as UsersList from './templates/user-list.js';
 import * as Chat from './templates/chat.js';
+import {handleChatMessage} from "./templates/chat.js";
 
 export let socket;
 

@@ -522,7 +522,7 @@ func SaveMessage(db *sql.DB, content string, receiverID int, fromUserID int) err
 	if err != nil {
 		return err
 	}
-
+	log.Printf("Message saved successfully")
 	return nil
 }
 

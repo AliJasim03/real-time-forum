@@ -86,10 +86,11 @@ func (s *server) handleMessages(conn *websocket.Conn, userID int) {
 			s.sendOnlineUsers(conn, userID)
 			break
 		case "chatOpen":
-			s.LastMessage(conn, userID)
+			s.LastMessage(conn, userID, message)
 			break
 		case "chat":
-			s.SendMessage(conn, userID)
+			log.Println("chat handel work")
+			s.SendMessage(conn, userID, message)
 			break
 		default:
 			log.Printf("Unknown message type: %s", chat.Type)
@@ -149,20 +150,18 @@ func (s *server) removeConnection(userId int) {
 	}
 }
 
-func (s *server) SendMessage(conn *websocket.Conn, userID int) {
+func (s *server) SendMessage(conn *websocket.Conn, userID int, message []byte) {
+	log.Println("SendMessage function started")
 	var chatMessage ChatMessage
-	_, message, err := conn.ReadMessage()
-	if err != nil {
-		log.Printf("Error reading WebSocket message: %v", err)
-		return
-	}
+
 	if err := json.Unmarshal(message, &chatMessage); err != nil {
 		log.Printf("Error unmarshaling message: %v", err)
 		return
 	}
-	//add user id to the message
+	// Add user ID to the message
 	chatMessage.From = userID
-	err = backend.SaveMessage(s.db, chatMessage.Message, chatMessage.To, userID)
+
+	err := backend.SaveMessage(s.db, chatMessage.Message, chatMessage.To, userID)
 	if err != nil {
 		log.Printf("Error saving message: %v", err)
 		return
@@ -173,12 +172,7 @@ func (s *server) SendMessage(conn *websocket.Conn, userID int) {
 	log.Println("Message forwarded, ready for the next message.")
 }
 
-func (s *server) LastMessage(conn *websocket.Conn, userID int) {
-	_, message, err := conn.ReadMessage()
-	if err != nil {
-		log.Printf("Error reading WebSocket message: %v", err)
-		return
-	}
+func (s *server) LastMessage(conn *websocket.Conn, userID int, message []byte) {
 	var load ChatPayload
 	if err := json.Unmarshal(message, &load); err != nil {
 		log.Printf("Error unmarshaling message: %v", err)
