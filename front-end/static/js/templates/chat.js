@@ -111,7 +111,7 @@ function displayNewMessage(fromUserID, content, fromUsername) {
         From: fromUsername,
         Message: content,
         CreatedAt: new Date().toISOString(), // Use ISO format for consistency
-        IsSender: fromUsername === currentUsername // Determine if the message is from the current user
+        IsSender: true
     });
 
     chatContainer.appendChild(messageElement);
@@ -158,14 +158,13 @@ export function loadOldMessages(data) {
     if (data && Array.isArray(data.messages)) {
         const chatContainer = document.getElementById('chat-messages');
         const fragment = document.createDocumentFragment();
-
         data.messages.forEach((messageData, index) => {
             console.log(`Message ${index}:`, messageData);
             const messageElement = createMessageElement({
                 From: messageData.username || 'Unknown',
                 Message: messageData.content || 'No content',
                 CreatedAt: messageData.created_at || null, // Ensure this field is properly formatted
-                IsSender: messageData.username === currentUsername // Determine if the message is from the current user
+                IsSender: messageData.isSender
             });
             fragment.prepend(messageElement); // Prepend old messages to the top
         });
@@ -188,26 +187,3 @@ const throttle = (fn, delay) => {
         }
     }
 }
-
-/*function createMessageElement({ FromUserID, Content, CreatedAt }) {
-    const messageElement = document.createElement('div');
-    messageElement.classList.add('chat-message', 'p-3', 'mb-2', 'border', 'rounded');
-
-    const userElement = document.createElement('div');
-    userElement.classList.add('message-user', 'font-weight-bold', 'text-primary');
-    userElement.textContent = `From: ${FromUserID}`;
-
-    const contentElement = document.createElement('div');
-    contentElement.classList.add('message-content');
-    contentElement.textContent = Content;
-
-    const timeElement = document.createElement('div');
-    timeElement.classList.add('message-time', 'text-muted', 'small');
-    timeElement.textContent = CreatedAt;
-
-    messageElement.appendChild(userElement);
-    messageElement.appendChild(contentElement);
-    messageElement.appendChild(timeElement);
-
-    return messageElement;
-}*/

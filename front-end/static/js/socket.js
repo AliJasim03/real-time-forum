@@ -1,6 +1,5 @@
 import * as UsersList from './templates/user-list.js';
 import * as Chat from './templates/chat.js';
-import {handleChatMessage} from "./templates/chat.js";
 
 export let socket;
 
@@ -21,6 +20,7 @@ export async function setupWebSocket() {
 
         // Handle incoming messages from the server
         socket.onmessage = function (event) {
+            debugger;
             console.log('Message received:', event.data);  // Log raw data received
             const data = JSON.parse(event.data);
             console.log('Parsed message data:', data);  // Log parsed data
@@ -36,7 +36,7 @@ export async function setupWebSocket() {
                     UsersList.updateOfflineUser(data.user);
                     break;
                 case 'chat':
-                    handleChatMessage(data);
+                    Chat.handleChatMessage(data);
                     break;
                 case 'oldMessages':
                     Chat.loadOldMessages(data);

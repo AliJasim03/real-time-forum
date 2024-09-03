@@ -52,6 +52,7 @@ type LoadMessages struct {
 	Username  string    `json:"username"`
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"created_at"`
+	IsSender  bool      `json:"isSender"`
 }
 
 func makeSocketManager() *socketsManager {
@@ -90,7 +91,7 @@ func (s *server) handleMessages(conn *websocket.Conn, userID int) {
 			break
 		case "chat":
 			log.Println("chat handel work")
-			s.SendMessage(conn, userID, message)
+			s.SendMessage(userID, message)
 			break
 		default:
 			log.Printf("Unknown message type: %s", chat.Type)
@@ -150,7 +151,7 @@ func (s *server) removeConnection(userId int) {
 	}
 }
 
-func (s *server) SendMessage(conn *websocket.Conn, userID int, message []byte) {
+func (s *server) SendMessage(userID int, message []byte) {
 	log.Println("SendMessage function started")
 	var chatMessage ChatMessage
 
@@ -166,7 +167,6 @@ func (s *server) SendMessage(conn *websocket.Conn, userID int, message []byte) {
 		log.Printf("Error saving message: %v", err)
 		return
 	}
-	log.Println("Message saved successfully")
 
 	s.forwardMessage(chatMessage)
 	log.Println("Message forwarded, ready for the next message.")
@@ -193,6 +193,7 @@ func (s *server) LastMessage(conn *websocket.Conn, userID int, message []byte) {
 			Username:  msg.Username,
 			Content:   msg.Content,
 			CreatedAt: msg.CreatedAt,
+			IsSender:  msg.IsSender,
 		})
 	}
 	log.Println("All messages:", convertedMessages)

@@ -32,7 +32,6 @@ func (s *server) Init() {
 	s.mux.HandleFunc("/", s.indexHandler)
 
 	s.mux.HandleFunc("/events", s.events)
-	//s.mux.HandleFunc("/api/getMessges", s.handleGetLastMessages)
 
 	// API routes
 	s.mux.HandleFunc("/api/loginAction", s.login)

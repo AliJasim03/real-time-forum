@@ -38,7 +38,7 @@ export function populateOnlineUserList(users) {
     //check if the user is on the chat page and update the name of the page
     // please forgive me ofr this stupid approach :)
     const username = $('#active-username');
-    if (!username.val()) {
+    if (!username.val() && window.location.href.includes('chat')) {
         const userID = window.location.href.split('?')[1].split('=')[1];
         const user = $('#user-link-' + userID).text();
         username.text(user);
@@ -66,7 +66,6 @@ export function updateOfflineUser(userId){
 
 
 export function requestOnlineUsers() {
-
     const message = {
         type: 'onlineUsers'
     };

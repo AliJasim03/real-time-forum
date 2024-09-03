@@ -114,11 +114,11 @@ func (s *server) sendEventToAll(data interface{}, userID int) {
 	s.eventManager.lock.Lock()
 	defer s.eventManager.lock.Unlock()
 
-	for connectionId, socket := range s.eventManager.sockets {
+	for _, socket := range s.eventManager.sockets {
 		if socket.connection != nil && !socket.closed.Load() && socket.userId != userID {
 			err := socket.connection.WriteJSON(data)
 			if err != nil {
-				log.Printf("Error sending event to connection ID %d: %v", connectionId, err)
+				log.Printf("Error sending event to user ID %d: %v", socket.userId, err)
 				socket.closed.Store(true)
 			}
 		}

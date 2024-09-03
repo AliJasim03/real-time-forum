@@ -20,6 +20,7 @@ type LoadMessages struct {
 	Username  string
 	Content   string
 	CreatedAt time.Time
+	IsSender  bool
 }
 
 func AllUsers(db *sql.DB) {
@@ -537,6 +538,18 @@ func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int, offset int) ([
         LIMIT ? OFFSET ?
     `
 
+	//get userID1 user name
+	queryUsername := `
+		SELECT username
+		FROM users
+		WHERE id = ?
+	`
+	var username string
+	err := db.QueryRow(queryUsername, userID1).Scan(&username)
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("Username: %s", username)
 	rows, err := db.Query(query, userID1, userID2, userID2, userID1, limit, offset)
 	if err != nil {
 		return nil, err
@@ -544,12 +557,14 @@ func GetLastMessages(db *sql.DB, userID1, userID2 int, limit int, offset int) ([
 	defer rows.Close()
 
 	var messages []LoadMessages
+
 	for rows.Next() {
 		var msg LoadMessages
 		if err := rows.Scan(&msg.Username, &msg.Content, &msg.CreatedAt); err != nil {
 			return nil, err
 		}
 		log.Printf("Message: %+v", msg) // Log each message
+		msg.IsSender = msg.Username == username
 		messages = append(messages, msg)
 	}
 
