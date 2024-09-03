@@ -1,6 +1,6 @@
-import { socket } from '../socket.js';
+import {socket} from '../socket.js';
 
-let offset = 0;
+var offset = 0;
 
 export function chatPage() {
     const app = $('#app');
@@ -24,21 +24,23 @@ export function chatPage() {
     `);
 
     $('#send-message').on('click', () => sendMessage());
-    $('#chat-messages').on('scroll', () => scrollTop());
+    $('#chat-messages').on('scroll', scrollTop);
 
-    openChat(offset);
+    openChat();
 }
 
-function scrollTop(){
+function scrollTop() {
     const chatContainer = $('#chat-messages');
     if (chatContainer.scrollTop() === 0) {
+        debugger;
         console.log("Scrolled to the top!");
         offset += 10;
-        throttle(() => openChat(offset), 100);
+        const throttledOpenChat = throttle(() => openChat(), 100);
+        throttledOpenChat();
     }
 }
 
-function openChat(offset) {
+export function openChat() {
     const userID = window.location.href.split('?')[1].split('=')[1];
 
     //parse the userID to an integer
@@ -47,8 +49,7 @@ function openChat(offset) {
         alert('User ID is missing');
         return;
     }
-
-    const opener = { type: 'chatOpen', RecipientID: userId_Parsed, Offset: offset};
+    const opener = {type: 'chatOpen', RecipientID: userId_Parsed, Offset: offset};
     if (socket) {
         socket.send(JSON.stringify(opener));
     } else {
@@ -66,7 +67,7 @@ function sendMessage() {
 
     if (message.trim() !== '') {
         let userId_Parsed = parseInt(userID);
-        const chatMessage = { type: 'chat', to: userId_Parsed, message: message };
+        const chatMessage = {type: 'chat', to: userId_Parsed, message: message};
         yourMessages(message);
         socket.send(JSON.stringify(chatMessage));
         $('#message-input').val('');
@@ -117,7 +118,7 @@ function displayNewMessage(fromUserID, content) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-function createMessageElement({ From, Message, CreatedAt, IsSender }) {
+function createMessageElement({From, Message, CreatedAt, IsSender}) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('chat-message');
 
@@ -187,14 +188,14 @@ const throttle = (fn, delay) => {
 
     // Here's our logic
     return () => {
-      if((time + delay - Date.now()) <= 0) {
-        // Run the function we've passed to our throttler,
-        // and reset the `time` variable (so we can check again).
-        fn();
-        time = Date.now();
-      }
+        if ((time + delay - Date.now()) <= 0) {
+            // Run the function we've passed to our throttler,
+            // and reset the `time` variable (so we can check again).
+            fn();
+            time = Date.now();
+        }
     }
-  }
+}
 
 /*function createMessageElement({ FromUserID, Content, CreatedAt }) {
     const messageElement = document.createElement('div');

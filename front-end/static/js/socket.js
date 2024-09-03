@@ -11,6 +11,9 @@ export async function setupWebSocket() {
         // Handle when the WebSocket connection is opened
         socket.onopen = function (event) {
             UsersList.requestOnlineUsers();
+            if(window.location.href.includes('chat')){
+                Chat.openChat()
+            }
             console.log('Connection opened');
             resolve(socket);  // Resolve the promise when the connection is established
         };
@@ -36,6 +39,9 @@ export async function setupWebSocket() {
                     break;
                 case 'oldMessages':
                     Chat.loadOldMessages(data);
+                    break;
+                case  'chatOpen':
+                    Chat.openChat(data);
                     break;
                 case 'error':
                     showError(data.message);
