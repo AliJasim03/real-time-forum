@@ -20,7 +20,6 @@ export async function setupWebSocket() {
 
         // Handle incoming messages from the server
         socket.onmessage = function (event) {
-            debugger;
             console.log('Message received:', event.data);  // Log raw data received
             const data = JSON.parse(event.data);
             console.log('Parsed message data:', data);  // Log parsed data

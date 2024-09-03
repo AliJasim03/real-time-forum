@@ -135,8 +135,23 @@ function createMessageElement({ From, Message, CreatedAt, IsSender }) {
     const timeSpan = document.createElement('span');
     if (CreatedAt) {
         const date = new Date(CreatedAt);
-        timeSpan.textContent = !isNaN(date.getTime()) ? date.toLocaleTimeString() : 'Invalid timestamp';
-        timeSpan.classList.add('text-muted', 'small');
+        if (!isNaN(date.getTime())) {
+            const formattedDate = date.toLocaleDateString([], {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric'
+            });
+            const formattedTime = date.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            timeSpan.textContent = `${formattedDate} ${formattedTime}`;
+            timeSpan.classList.add('text-muted', 'small','fw-light');
+
+        } else {
+            timeSpan.textContent = 'Invalid timestamp';
+        }
     } else {
         timeSpan.textContent = 'No timestamp';
     }
