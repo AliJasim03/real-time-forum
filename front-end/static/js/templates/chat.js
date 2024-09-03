@@ -1,9 +1,10 @@
-import { socket } from '../socket.js';
+import {socket} from '../socket.js';
 
 var offset = 0;
 var currentUsername; // Variable to store the current username
 
 export function chatPage() {
+    offset = 0; // when changing chat room reset the offset
     const app = $('#app');
     const userID = window.location.href.split('?')[1].split('=')[1];
     currentUsername = $('#user-link-' + userID).text(); // Store current username
@@ -23,6 +24,11 @@ export function chatPage() {
             </div>
         </div>
     `);
+
+    const alertBadge = $('#user-alert-' + userID); // Store current username
+    if (alertBadge) {
+        alertBadge.css('display', 'none'); // Hide the badge
+    }
 
     $('#send-message').on('click', () => sendMessage());
     $('#chat-messages').on('scroll', scrollTop);
@@ -48,8 +54,8 @@ export function openChat() {
         alert('User ID is missing');
         return;
     }
-    
-    const opener = { type: 'chatOpen', RecipientID: userId_Parsed, Offset: offset };
+
+    const opener = {type: 'chatOpen', RecipientID: userId_Parsed, Offset: offset};
     if (socket) {
         socket.send(JSON.stringify(opener));
     } else {
@@ -68,7 +74,7 @@ function sendMessage() {
 
     if (message.trim() !== '') {
         let userId_Parsed = parseInt(userID);
-        const chatMessage = { type: 'chat', to: userId_Parsed, message: message };
+        const chatMessage = {type: 'chat', to: userId_Parsed, message: message};
         yourMessages(message);
         socket.send(JSON.stringify(chatMessage));
         $('#message-input').val('');
@@ -95,7 +101,8 @@ export function handleChatMessage(data) {
     console.log("Received data:", data);
     try {
         if (data !== null && typeof data === 'object') {
-            displayNewMessage(data.from, data.message, data.Username);
+            displayNewMessage(data.from, data.message, data.fromUserName);
+            displayNotification(data.from);
         } else {
             console.error("Invalid message format:", data);
         }
@@ -111,14 +118,14 @@ function displayNewMessage(fromUserID, content, fromUsername) {
         From: fromUsername,
         Message: content,
         CreatedAt: new Date().toISOString(), // Use ISO format for consistency
-        IsSender: true
+        IsSender: false
     });
 
     chatContainer.appendChild(messageElement);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-function createMessageElement({ From, Message, CreatedAt, IsSender }) {
+function createMessageElement({From, Message, CreatedAt, IsSender}) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('chat-message');
     messageDiv.classList.add(IsSender ? 'sender' : 'recipient');
@@ -147,7 +154,7 @@ function createMessageElement({ From, Message, CreatedAt, IsSender }) {
             });
 
             timeSpan.textContent = `${formattedDate} ${formattedTime}`;
-            timeSpan.classList.add('text-muted', 'small','fw-light');
+            timeSpan.classList.add('text-muted', 'small', 'fw-light');
 
         } else {
             timeSpan.textContent = 'Invalid timestamp';
@@ -188,6 +195,15 @@ export function loadOldMessages(data) {
         chatContainer.scrollTop = chatContainer.scrollHeight;
     } else {
         console.log("No messages to display or invalid data format.");
+    }
+}
+
+
+function displayNotification(from) {
+    const userID = window.location.href.split('?')[1].split('=')[1];
+    if(from !== parseInt(userID)){
+        const alertBadge = $('#user-alert-' + from); // Store current username
+        alertBadge.css('display', 'inline'); // Use jQuery's css method to change the display property
     }
 }
 
