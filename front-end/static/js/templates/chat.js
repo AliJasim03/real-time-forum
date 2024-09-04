@@ -4,6 +4,9 @@ var offset = 0;
 var currentUsername; // Variable to store the current username
 
 export function chatPage() {
+
+    offset = 0;
+
     const app = $('#app');
     const userID = window.location.href.split('?')[1].split('=')[1];
     currentUsername = $('#user-link-' + userID).text(); // Store current username
@@ -35,6 +38,7 @@ function scrollTop() {
     if (chatContainer.scrollTop() === 0) {
         console.log("Scrolled to the top!");
         offset += 10;
+        // console.log("Offset:", offset);
         const throttledOpenChat = throttle(() => openChat(), 100);
         throttledOpenChat();
     }
@@ -71,6 +75,7 @@ function sendMessage() {
         let userId_Parsed = parseInt(userID);
         const chatMessage = { type: 'chat', to: userId_Parsed, message: message, username: senderUsername };
         yourMessages(message);
+
         socket.send(JSON.stringify(chatMessage));
         $('#message-input').val('');
     }
