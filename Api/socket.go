@@ -39,6 +39,7 @@ type ChatMessage struct {
 	From    int    `json:"from"`
 	To      int    `json:"to"`
 	Message string `json:"message"`
+	UserName string `json:"username"`
 }
 
 type ChatPayload struct {

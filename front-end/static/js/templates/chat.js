@@ -60,6 +60,7 @@ export function openChat() {
 function sendMessage() {
     const userID = window.location.href.split('?')[1].split('=')[1];
     const message = $('#message-input').val();
+    const senderUsername = "trty";  // ! l should be replaced with the actual username of sender
 
     if (userID === undefined || userID === '') {
         alert('User ID is missing');
@@ -68,7 +69,7 @@ function sendMessage() {
 
     if (message.trim() !== '') {
         let userId_Parsed = parseInt(userID);
-        const chatMessage = { type: 'chat', to: userId_Parsed, message: message };
+        const chatMessage = { type: 'chat', to: userId_Parsed, message: message, username: senderUsername };
         yourMessages(message);
         socket.send(JSON.stringify(chatMessage));
         $('#message-input').val('');
@@ -95,7 +96,8 @@ export function handleChatMessage(data) {
     console.log("Received data:", data);
     try {
         if (data !== null && typeof data === 'object') {
-            displayNewMessage(data.from, data.message, data.Username);
+            debugger;
+            displayNewMessage(data.from, data.message, data.username);
         } else {
             console.error("Invalid message format:", data);
         }
@@ -105,13 +107,14 @@ export function handleChatMessage(data) {
 }
 
 function displayNewMessage(fromUserID, content, fromUsername) {
+    debugger;
     console.log("Displaying message from:", fromUserID);
     const chatContainer = document.getElementById('chat-messages');
     const messageElement = createMessageElement({
         From: fromUsername,
         Message: content,
         CreatedAt: new Date().toISOString(), // Use ISO format for consistency
-        IsSender: true
+        IsSender: false
     });
 
     chatContainer.appendChild(messageElement);

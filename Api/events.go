@@ -39,7 +39,7 @@ func (s *server) events(w http.ResponseWriter, r *http.Request) {
 func (s *server) forwardMessage(chatMessage ChatMessage) {
 	s.eventManager.lock.Lock()
 
-	log.Printf("Attempting to forward message to user %s from user %d", chatMessage.To, chatMessage.From)
+	log.Printf("Attempting to forward message to user %s from user %d", chatMessage.To, chatMessage.From, chatMessage.UserName)
 
 	var recipientFound bool
 	for _, socket := range s.eventManager.sockets {
