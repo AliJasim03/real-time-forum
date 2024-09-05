@@ -64,7 +64,7 @@ export function openChat() {
 function sendMessage() {
     const userID = window.location.href.split('?')[1].split('=')[1];
     const message = $('#message-input').val();
-    const senderUsername = "trty";  // ! l should be replaced with the actual username of sender
+    const senderUsername = "";  // ! l should be replaced with the actual username of sender
 
     if (userID === undefined || userID === '') {
         alert('User ID is missing');

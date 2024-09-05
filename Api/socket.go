@@ -93,6 +93,7 @@ func (s *server) handleMessages(conn *websocket.Conn, userID int) {
 		case "chat":
 			log.Println("chat handel work")
 			s.SendMessage(userID, message)
+			s.sendOnlineUsers(conn, userID)
 			break
 		default:
 			log.Printf("Unknown message type: %s", chat.Type)
