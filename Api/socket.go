@@ -9,6 +9,7 @@ import (
 	"time"
 
 	backend "forum/db"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -35,10 +36,10 @@ type ChatType struct {
 }
 
 type ChatMessage struct {
-	Type    string `json:"type"`
-	From    int    `json:"from"`
-	To      int    `json:"to"`
-	Message string `json:"message"`
+	Type     string `json:"type"`
+	From     int    `json:"from"`
+	To       int    `json:"to"`
+	Message  string `json:"message"`
 	UserName string `json:"username"`
 }
 
@@ -163,7 +164,6 @@ func (s *server) SendMessage(userID int, message []byte) {
 	}
 	// Add user ID to the message
 	chatMessage.From = userID
-	chatMessage.FromUserName = backend.GetUsername(s.db, userID)
 	err := backend.SaveMessage(s.db, chatMessage.Message, chatMessage.To, userID)
 	if err != nil {
 		log.Printf("Error saving message: %v", err)

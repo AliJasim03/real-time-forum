@@ -1,4 +1,4 @@
-import {socket} from '../socket.js';
+import { socket } from '../socket.js';
 
 var offset = 0;
 var currentUsername; // Variable to store the current username
@@ -56,7 +56,7 @@ export function openChat() {
         return;
     }
 
-    const opener = {type: 'chatOpen', RecipientID: userId_Parsed, Offset: offset};
+    const opener = { type: 'chatOpen', RecipientID: userId_Parsed, Offset: offset };
     if (socket) {
         socket.send(JSON.stringify(opener));
     } else {
@@ -75,7 +75,7 @@ function sendMessage() {
 
     if (message.trim() !== '') {
         let userId_Parsed = parseInt(userID);
-        const chatMessage = {type: 'chat', to: userId_Parsed, message: message};
+        const chatMessage = { type: 'chat', to: userId_Parsed, message: message };
         yourMessages(message);
 
         socket.send(JSON.stringify(chatMessage));
@@ -128,7 +128,7 @@ function displayNewMessage(fromUserID, content, fromUsername) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-function createMessageElement({From, Message, CreatedAt, IsSender}) {
+function createMessageElement({ From, Message, CreatedAt, IsSender }) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('chat-message');
     messageDiv.classList.add(IsSender ? 'sender' : 'recipient');
@@ -178,10 +178,13 @@ function createMessageElement({From, Message, CreatedAt, IsSender}) {
 }
 
 export function loadOldMessages(data) {
+    debugger;
     console.log("Received data:", data);
 
     if (data && Array.isArray(data.messages)) {
         const chatContainer = document.getElementById('chat-messages');
+        // Save current scroll position from the bottom
+        const previousScrollHeight = chatContainer.scrollHeight;
         const fragment = document.createDocumentFragment();
         data.messages.forEach((messageData, index) => {
             console.log(`Message ${index}:`, messageData);
@@ -195,7 +198,7 @@ export function loadOldMessages(data) {
         });
 
         chatContainer.prepend(fragment);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        chatContainer.scrollTop = chatContainer.scrollHeight - previousScrollHeight;
     } else {
         console.log("No messages to display or invalid data format.");
     }
@@ -204,7 +207,7 @@ export function loadOldMessages(data) {
 
 function displayNotification(from) {
     const userID = window.location.href.split('?')[1].split('=')[1];
-    if(from !== parseInt(userID)){
+    if (from !== parseInt(userID)) {
         const alertBadge = $('#user-alert-' + from); // Store current username
         alertBadge.css('display', 'inline'); // Use jQuery's css method to change the display property
     }
