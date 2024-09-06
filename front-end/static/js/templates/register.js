@@ -1,4 +1,4 @@
-import { navigate, updateNavbar } from '../app.js'; // Adjust the import path based on your directory structure
+import { isLoggedIn, navigate, updateNavbar } from '../app.js'; // Adjust the import path based on your directory structure
 
 export function registerPage() {
     const app = $('#app');
@@ -119,10 +119,10 @@ export function registerAction() {
             // Handle successful registration
             showSuccess("Registration successful");
             setTimeout(() => {
+                isLoggedIn = true;
                 navigate('/'); // Redirect to the login page
                 updateNavbar(true);
-                $('#user-col').removeClass('d-none');
-            }, 1000);
+            }, 300);
         })
         .catch(error => {
             showError(error.message);

@@ -6,9 +6,9 @@ import (
 )
 
 func main() {
-
 	db := backend.OpenConnection()
 
 	server := api.New(db)
+	server.UpdateUserName()
 	server.Init()
 }

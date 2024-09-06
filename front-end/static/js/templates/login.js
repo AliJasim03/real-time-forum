@@ -1,6 +1,7 @@
-import { loginAction, checkAuth, updateView, isLoggedIn } from '../app.js';
+import { loginAction, updateView, isLoggedIn } from '../app.js';
 
 export async function loginPage() {
+
     if (isLoggedIn) {
         history.pushState(null, null, '/');
         updateView('/');
@@ -16,7 +17,7 @@ export async function loginPage() {
                     <div class="alert alert-success d-none" id="success"></div>
                     <div class="alert alert-danger d-none" id="error"></div>
                     <div class="form-group mb-3">
-                        <label for="email">Email address</label>
+                        <label for="email">Email address or Nickname</label>
                         <input type="email" class="form-control" name="email" id="email" placeholder="Enter email">
                     </div>
                     <div class="form-group mb-3">

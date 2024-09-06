@@ -1,5 +1,5 @@
 import * as Templates from './templates/export.js';
-import { setupWebSocket,socket } from './socket.js';
+import { setupWebSocket, socket } from './socket.js';
 // Define routes
 const routes = {
     '/': Templates.Index.homePage,
@@ -30,6 +30,12 @@ export async function navigate(path) {
 
 // Update the view based on the current path
 export function updateView(path) {
+
+    if (!isLoggedIn && (path !== '/login' && path !== '/register')) {
+        history.pushState(null, null, '/login');
+        updateView('/login');
+        return;
+    }
     //remove all the optional query parameters
     path = path.split('?')[0];
     const view = routes[path];
@@ -116,12 +122,12 @@ export function loginAction() {
             //show login success message
             showSuccess("Login successful");
             setTimeout(() => {
-                //show the user list
-                $('#user-col').removeClass('d-none');
-                setupWebSocket(); // Call the function to set up the WebSocket connection
+                isLoggedIn = true;
                 navigate('/'); // Redirect to the home page
                 updateNavbar(true);
-            }, 2000);
+                debugger;
+                // setupWebSocket(); // Call the function to set up the WebSocket connection
+            }, 500);
         })
         .catch(error => {
             showError(error.message);
@@ -170,7 +176,6 @@ $(document).ready(async function () {
         // Initialize the view
         await setupWebSocket(); // Call the function to set up the WebSocket connection
         updateView(window.location.pathname);
-        $('#user-col').removeClass('d-none');
     } else {
         // redirect to login page
         history.pushState(null, null, '/login');
