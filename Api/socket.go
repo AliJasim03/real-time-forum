@@ -35,11 +35,11 @@ type ChatType struct {
 }
 
 type ChatMessage struct {
-	Type         string `json:"type"`
-	From         int    `json:"from"`
-	FromUserName string `json:"fromUserName"`
-	To           int    `json:"to"`
-	Message      string `json:"message"`
+	Type    string `json:"type"`
+	From    int    `json:"from"`
+	To      int    `json:"to"`
+	Message string `json:"message"`
+	UserName string `json:"username"`
 }
 
 type ChatPayload struct {
@@ -93,6 +93,7 @@ func (s *server) handleMessages(conn *websocket.Conn, userID int) {
 		case "chat":
 			log.Println("chat handel work")
 			s.SendMessage(userID, message)
+			s.sendOnlineUsers(conn, userID)
 			break
 		default:
 			log.Printf("Unknown message type: %s", chat.Type)
