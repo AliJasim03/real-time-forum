@@ -36,13 +36,8 @@ export async function setupWebSocket() {
                     break;
                 case 'chat':
                     debugger;
+                    console.log('Received chat message:', data);
                     Chat.handleChatMessage(data);
-                    if (Array.isArray(data.users)) {
-                        console.log('Updating user list after chat message:', data.users);
-                        UsersList.populateOnlineUserList(data.users);
-                    } else {
-                        console.error('Invalid user list data in chat message:', data.users);
-                    }
                     break;
                 case 'oldMessages':
                     Chat.loadOldMessages(data);

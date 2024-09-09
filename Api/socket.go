@@ -92,7 +92,7 @@ func (s *server) handleMessages(conn *websocket.Conn, userID int) {
 			s.LastMessage(conn, userID, message)
 			break
 		case "chat":
-			log.Println("chat handel work")
+			// log.Println("chat handel work")
 			s.SendMessage(userID, message)
 			s.sendOnlineUsers(conn, userID)
 			break

@@ -67,7 +67,7 @@ export function openChat() {
 function sendMessage() {
     const userID = window.location.href.split('?')[1].split('=')[1];
     const message = $('#message-input').val();
-
+    let senderUser = 'checker'
     if (userID === undefined || userID === '') {
         alert('User ID is missing');
         return;
@@ -75,7 +75,7 @@ function sendMessage() {
 
     if (message.trim() !== '') {
         let userId_Parsed = parseInt(userID);
-        const chatMessage = { type: 'chat', to: userId_Parsed, message: message };
+        const chatMessage = { type: 'chat', to: userId_Parsed, message: message, username: senderUser};
         yourMessages(message);
 
         socket.send(JSON.stringify(chatMessage));
@@ -103,8 +103,9 @@ export function handleChatMessage(data) {
     console.log("Received data:", data);
     try {
         if (data !== null && typeof data === 'object') {
-            displayNewMessage(data.from, data.message, data.fromUserName);
-            displayNotification(data.from);
+            console.log(data.from, data.message, data.fromUserName);
+                displayNotification(data.from);
+                displayNewMessage(data.from, data.message, data.fromUserName);
         } else {
             console.error("Invalid message format:", data);
         }
@@ -114,18 +115,22 @@ export function handleChatMessage(data) {
 }
 
 function displayNewMessage(fromUserID, content, fromUsername) {
-    debugger;
-    console.log("Displaying message from:", fromUserID);
-    const chatContainer = document.getElementById('chat-messages');
-    const messageElement = createMessageElement({
-        From: fromUsername,
-        Message: content,
-        CreatedAt: new Date().toISOString(), // Use ISO format for consistency
-        IsSender: false
-    });
+    // debugger;
+    if ($('#chat-messages')){
+        console.log("Displaying message from:", fromUserID);
+        const chatContainer = document.getElementById('chat-messages');
+        const messageElement = createMessageElement({
+            From: fromUsername,
+            Message: content,
+            CreatedAt: new Date().toISOString(), // Use ISO format for consistency
+            IsSender: false
+        });
 
-    chatContainer.appendChild(messageElement);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+        chatContainer.appendChild(messageElement);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }else{
+        displayNotification(fromUserID);
+    }
 }
 
 function createMessageElement({ From, Message, CreatedAt, IsSender }) {
@@ -206,11 +211,13 @@ export function loadOldMessages(data) {
 
 
 function displayNotification(from) {
-    const userID = window.location.href.split('?')[1].split('=')[1];
-    if (from !== parseInt(userID)) {
+    console.log('display nitfication work')
+    alert('You have a new message from ' + from);
+    // const userID = window.location.href.split('?')[1].split('=')[1];
+    // if (from !== parseInt(userID)) {
         const alertBadge = $('#user-alert-' + from); // Store current username
         alertBadge.css('display', 'inline'); // Use jQuery's css method to change the display property
-    }
+    // }
 }
 
 const throttle = (fn, delay) => {

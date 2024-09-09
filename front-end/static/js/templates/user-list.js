@@ -75,7 +75,7 @@ export function populateOnlineUserList(users) {
 
 
 export function updateOnlineUserList(userId){
-    debugger;
+    // debugger;
     const userLink = document.getElementById(`user-link-${userId}`);
     if (userLink) {
         userLink.nextElementSibling.textContent = 'Online';
