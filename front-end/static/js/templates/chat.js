@@ -104,7 +104,7 @@ export function handleChatMessage(data) {
     try {
         if (data !== null && typeof data === 'object') {
             console.log(data.from, data.message, data.fromUserName);
-                displayNotification(data.from);
+                // displayNotification(data.from);
                 displayNewMessage(data.from, data.message, data.fromUserName);
         } else {
             console.error("Invalid message format:", data);
@@ -116,7 +116,12 @@ export function handleChatMessage(data) {
 
 function displayNewMessage(fromUserID, content, fromUsername) {
     // debugger;
+
     if ($('#chat-messages')){
+        displayNotification(fromUserID);
+        return;
+    }
+
         console.log("Displaying message from:", fromUserID);
         const chatContainer = document.getElementById('chat-messages');
         const messageElement = createMessageElement({
@@ -128,9 +133,6 @@ function displayNewMessage(fromUserID, content, fromUsername) {
 
         chatContainer.appendChild(messageElement);
         chatContainer.scrollTop = chatContainer.scrollHeight;
-    }else{
-        displayNotification(fromUserID);
-    }
 }
 
 function createMessageElement({ From, Message, CreatedAt, IsSender }) {
