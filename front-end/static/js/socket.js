@@ -11,7 +11,7 @@ export async function setupWebSocket() {
         // Handle when the WebSocket connection is opened
         socket.onopen = function (event) {
             UsersList.requestOnlineUsers();
-            if(window.location.href.includes('chat')){
+            if (window.location.href.includes('chat')) {
                 Chat.openChat()
             }
             console.log('Connection opened');
@@ -35,14 +35,12 @@ export async function setupWebSocket() {
                     UsersList.updateOfflineUser(data.user);
                     break;
                 case 'chat':
-                    debugger;
-                    console.log('Received chat message:', data);
                     Chat.handleChatMessage(data);
                     break;
                 case 'oldMessages':
                     Chat.loadOldMessages(data);
                     break;
-                case  'chatOpen':
+                case 'chatOpen':
                     Chat.openChat(data);
                     break;
                 case 'error':

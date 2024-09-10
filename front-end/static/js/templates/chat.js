@@ -75,7 +75,7 @@ function sendMessage() {
 
     if (message.trim() !== '') {
         let userId_Parsed = parseInt(userID);
-        const chatMessage = { type: 'chat', to: userId_Parsed, message: message, username: senderUser};
+        const chatMessage = { type: 'chat', to: userId_Parsed, message: message, username: senderUser };
         yourMessages(message);
 
         socket.send(JSON.stringify(chatMessage));
@@ -85,7 +85,6 @@ function sendMessage() {
 
 function yourMessages(message) {
     const now = new Date();
-    const time = now.toLocaleTimeString();
 
     const chatContainer = document.getElementById('chat-messages');
     const messageElement = createMessageElement({
@@ -105,8 +104,8 @@ export function handleChatMessage(data) {
     try {
         if (data !== null && typeof data === 'object') {
             console.log(data.from, data.message, data.username);
-                // displayNotification(data.from);
-                displayNewMessage(data.from, data.message, data.username);
+            displayNotification(data.from);
+            displayNewMessage(data.from, data.message, data.username);
         } else {
             console.error("Invalid message format:", data);
         }
@@ -118,22 +117,20 @@ export function handleChatMessage(data) {
 function displayNewMessage(fromUserID, content, fromUsername) {
     // debugger;
 
-    if ($('#chat-messages')){
-        displayNotification(fromUserID);
+    const userID = window.location.href.split('?')[1].split('=')[1];
+    if (fromUserID !== parseInt(userID)) {
         return;
     }
+    const chatContainer = document.getElementById('chat-messages');
+    const messageElement = createMessageElement({
+        From: fromUsername,
+        Message: content,
+        CreatedAt: new Date().toISOString(), // Use ISO format for consistency
+        IsSender: false
+    });
 
-        console.log("Displaying message from:", fromUserID);
-        const chatContainer = document.getElementById('chat-messages');
-        const messageElement = createMessageElement({
-            From: fromUsername,
-            Message: content,
-            CreatedAt: new Date().toISOString(), // Use ISO format for consistency
-            IsSender: false
-        });
-
-        chatContainer.appendChild(messageElement);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+    chatContainer.appendChild(messageElement);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
 function createMessageElement({ From, Message, CreatedAt, IsSender }) {
@@ -186,9 +183,6 @@ function createMessageElement({ From, Message, CreatedAt, IsSender }) {
 }
 
 export function loadOldMessages(data) {
-    debugger;
-    console.log("Received data:", data);
-
     if (data && Array.isArray(data.messages)) {
         const chatContainer = document.getElementById('chat-messages');
         // Save current scroll position from the bottom
@@ -214,13 +208,12 @@ export function loadOldMessages(data) {
 
 
 function displayNotification(from) {
-    console.log('display nitfication work')
-    // alert('You have a new message from ' + from);
-    //const userID = window.location.href.split('?')[1].split('=')[1];
-     if (from /*!== parseInt(userID)*/) {
+    debugger
+    const userID = window.location.href.split('?')[1].split('=')[1];
+    if (from !== parseInt(userID)) {
         const alertBadge = $('#user-alert-' + from); // Store current username
         alertBadge.css('display', 'inline'); // Use jQuery's css method to change the display property
-     }
+    }
 }
 
 const throttle = (fn, delay) => {
