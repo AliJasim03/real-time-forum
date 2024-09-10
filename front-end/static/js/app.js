@@ -125,8 +125,7 @@ export function loginAction() {
                 isLoggedIn = true;
                 navigate('/'); // Redirect to the home page
                 updateNavbar(true);
-                // debugger;
-                 setupWebSocket(); // Call the function to set up the WebSocket connection
+                setupWebSocket(); // Call the function to set up the WebSocket connection
             }, 500);
         })
         .catch(error => {

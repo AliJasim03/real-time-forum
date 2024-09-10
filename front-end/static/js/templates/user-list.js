@@ -34,6 +34,13 @@ export function populateOnlineUserList(users) {
         badgesContainer.className = 'd-flex align-items-center';
 
         // Create the exclamation mark badge, initially hidden
+        const typing = document.createElement('span');
+        typing.id = `user-typing-${user.ID}`;
+        typing.className = 'badge bg-warning text-dark ms-1 me-1'; // Margin left and right
+        typing.textContent = 'typing...';
+        typing.style.display = 'none'; // Initially hide the badge
+
+        // Create the exclamation mark badge, initially hidden
         const alertBadge = document.createElement('span');
         alertBadge.id = `user-alert-${user.ID}`;
         alertBadge.className = 'badge bg-warning text-dark ms-2 me-2'; // Margin left and right
@@ -47,6 +54,7 @@ export function populateOnlineUserList(users) {
         statusBadge.textContent = user.IsOnline ? 'Online' : 'Offline';
 
         // Append the badges to the container
+        badgesContainer.appendChild(typing);
         badgesContainer.appendChild(alertBadge);
         badgesContainer.appendChild(statusBadge);
 
@@ -76,7 +84,6 @@ export function populateOnlineUserList(users) {
 
 
 export function updateOnlineUserList(userId) {
-    debugger;
     const userLink = document.getElementById(`user-status-${userId}`);
     if (userLink) {
         userLink.textContent = 'Online';
@@ -88,6 +95,17 @@ export function updateOfflineUser(userId) {
     if (userLink) {
         userLink.textContent = 'Offline';
         userLink.className = 'badge bg-secondary';
+    }
+}
+
+export function updateTypingStatus(userId,typing) {
+    const alertBadge = document.getElementById(`user-typing-${userId}`);
+    if (alertBadge) {
+        if (typing) {
+            alertBadge.style.display = 'inline';
+        }else{
+            alertBadge.style.display = 'none';
+        }
     }
 }
 

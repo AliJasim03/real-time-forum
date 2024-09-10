@@ -2,12 +2,12 @@ import { socket } from '../socket.js';
 
 var offset = 0;
 var currentUsername; // Variable to store the current username
+var userID;
 
 export function chatPage() {
-    debugger;
     offset = 0; // when changing chat room reset the offset
     const app = $('#app');
-    const userID = window.location.href.split('?')[1].split('=')[1];
+    userID = window.location.href.split('?')[1].split('=')[1];
     currentUsername = $('#user-link-' + userID).text(); // Store current username
     app.html(`
         <div class="container">
@@ -34,24 +34,42 @@ export function chatPage() {
     $('#send-message').on('click', () => sendMessage());
     $('#chat-messages').on('scroll', scrollTop);
 
+    let isTyping = false;
+    let typingTimer;        
+    
+    document.getElementById('message-input').addEventListener('keydown', function () {
+        if (!isTyping) {
+            socket.send(JSON.stringify({ type: 'typing',to: userID, typing: true }));
+            isTyping = true;
+        }
+        clearTimeout(typingTimer);
+    });
+    
+    document.getElementById('message-input').addEventListener('keyup', function () {
+        debugger;
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(function () {
+            socket.send(JSON.stringify({ type: 'stopTyping',to: userID, typing: false }));
+            isTyping = false;
+        }, 1000); // Stop typing after 1 second of inactivity
+    });
+
+
     openChat();
 }
 
 function scrollTop() {
     const chatContainer = $('#chat-messages');
     if (chatContainer.scrollTop() === 0) {
-        debugger;
         console.log("Scrolled to the top!");
         offset += 10;
         // console.log("Offset:", offset);
-        debugger;
         const throttledOpenChat = throttle(() => openChat(), 100);
         throttledOpenChat();
     }
 }
 
 export function openChat() {
-    const userID = window.location.href.split('?')[1].split('=')[1];
     let userId_Parsed = parseInt(userID);
 
     if (userID === undefined || userID === '' || isNaN(userId_Parsed)) {
@@ -67,7 +85,6 @@ export function openChat() {
 }
 
 function sendMessage() {
-    const userID = window.location.href.split('?')[1].split('=')[1];
     const message = $('#message-input').val();
     let senderUser = currentUsername;
     if (userID === undefined || userID === '') {
@@ -101,8 +118,6 @@ function yourMessages(message) {
 }
 
 export function handleChatMessage(data) {
-    debugger;
-    console.log("Received data:", data);
     try {
         if (data !== null && typeof data === 'object') {
             console.log(data.from, data.message, data.username);
@@ -117,9 +132,6 @@ export function handleChatMessage(data) {
 }
 
 function displayNewMessage(fromUserID, content, fromUsername) {
-    // debugger;
-
-    const userID = window.location.href.split('?')[1].split('=')[1];
     if (fromUserID !== parseInt(userID)) {
         return;
     }
@@ -203,14 +215,12 @@ export function loadOldMessages(data) {
         chatContainer.prepend(fragment);
         chatContainer.scrollTop = chatContainer.scrollHeight - previousScrollHeight;
     } else {
-        console.log("No messages to display or invalid data format.");
+       console.log("No messages to display or invalid data format.");
     }
 }
 
 
 function displayNotification(from) {
-    debugger
-    const userID = window.location.href.split('?')[1].split('=')[1];
     if (from !== parseInt(userID)) {
         const alertBadge = $('#user-alert-' + from); // Store current username
         alertBadge.css('display', 'inline'); // Use jQuery's css method to change the display property
@@ -219,7 +229,6 @@ function displayNotification(from) {
 
 const throttle = (fn, delay) => {
     let lastCall = 0;
-
     return () => {
         const now = Date.now();
         if (now - lastCall >= delay) {

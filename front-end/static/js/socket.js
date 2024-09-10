@@ -17,8 +17,8 @@ export async function setupWebSocket() {
 
         // Handle incoming messages from the server
         socket.onmessage = function (event) {
+            debugger;   
             const data = JSON.parse(event.data);
-            debugger
             switch (data.type) {
                 case 'onlineUsers':
                     UsersList.populateOnlineUserList(data.users);
@@ -40,6 +40,13 @@ export async function setupWebSocket() {
                     break;
                 case 'error':
                     showError(data.message);
+                    break;
+                    //devonly
+                case 'typing':
+                    UsersList.updateTypingStatus(data.from, data.typing);
+                    break;
+                case 'stopTyping':
+                    UsersList.updateTypingStatus(data.from, data.typing);
                     break;
                 default:
                     console.log('Unknown message type:', data.type);
@@ -66,7 +73,6 @@ export async function setupWebSocket() {
         };
     });
 }
-
 
 
 

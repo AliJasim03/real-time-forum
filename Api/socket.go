@@ -2,6 +2,8 @@ package api
 
 import (
 	"encoding/json"
+	"strconv"
+
 	// "fmt"
 	"log"
 	"sync"
@@ -57,6 +59,13 @@ type LoadMessages struct {
 	IsSender  bool      `json:"isSender"`
 }
 
+type TypingStatus struct {
+	Type   string `json:"type"`
+	To     string `json:"to"`
+	From   string `json:"from"`
+	Typing bool   `json:"typing"`
+}
+
 func makeSocketManager() *socketsManager {
 	return &socketsManager{
 		socketCounter: atomic.Uint64{},
@@ -95,6 +104,12 @@ func (s *server) handleMessages(conn *websocket.Conn, userID int) {
 			// log.Println("chat handel work")
 			s.SendMessage(userID, message)
 			s.sendOnlineUsers(conn, userID)
+			break
+		case "stopTyping":
+			s.sendTypingStatus(userID, message)
+			break
+		case "typing":
+			s.sendTypingStatus(userID, message)
 			break
 		default:
 			log.Printf("Unknown message type: %s", chat.Type)
@@ -155,27 +170,26 @@ func (s *server) removeConnection(userId int) {
 }
 
 func (s *server) SendMessage(userID int, message []byte) {
-    log.Println("SendMessage function started")
-    var chatMessage ChatMessage
+	log.Println("SendMessage function started")
+	var chatMessage ChatMessage
 
-    if err := json.Unmarshal(message, &chatMessage); err != nil {
-        log.Printf("Error unmarshaling message: %v", err)
-        return
-    }
+	if err := json.Unmarshal(message, &chatMessage); err != nil {
+		log.Printf("Error unmarshaling message: %v", err)
+		return
+	}
 
-    chatMessage.From = userID
-    chatMessage.UserName = backend.GetUsername(s.db, userID)
+	chatMessage.From = userID
+	chatMessage.UserName = backend.GetUsername(s.db, userID)
 
-    err := backend.SaveMessage(s.db, chatMessage.Message, chatMessage.To, userID)
-    if err != nil {
-        log.Printf("Error saving message: %v", err)
-        return
-    }
+	err := backend.SaveMessage(s.db, chatMessage.Message, chatMessage.To, userID)
+	if err != nil {
+		log.Printf("Error saving message: %v", err)
+		return
+	}
 
-    s.forwardMessage(chatMessage)
-    log.Println("Message forwarded, ready for the next message.")
+	s.forwardMessage(chatMessage)
+	log.Println("Message forwarded, ready for the next message.")
 }
-
 
 func (s *server) LastMessage(conn *websocket.Conn, userID int, message []byte) {
 	var load ChatPayload
@@ -211,4 +225,23 @@ func (s *server) LastMessage(conn *websocket.Conn, userID int, message []byte) {
 	if err := conn.WriteJSON(data); err != nil {
 		log.Printf("Error sending last messages: %v", err)
 	}
+}
+
+func (s *server) sendTypingStatus(userID int, message []byte) {
+	var chatMessage TypingStatus
+	if err := json.Unmarshal(message, &chatMessage); err != nil {
+		log.Printf("Error unmarshaling message: %v", err)
+		return
+	}
+
+	chatMessage.From = strconv.Itoa(userID)
+
+	for _, socket := range s.eventManager.sockets {
+		if strconv.Itoa(socket.userId) == chatMessage.To {
+			chatMessage.Type = "typing"
+			s.sendEventToUser(socket.connection, chatMessage)
+			break
+		}
+	}
+
 }
