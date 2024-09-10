@@ -4,6 +4,7 @@ var offset = 0;
 var currentUsername; // Variable to store the current username
 
 export function chatPage() {
+    debugger;
     offset = 0; // when changing chat room reset the offset
     const app = $('#app');
     const userID = window.location.href.split('?')[1].split('=')[1];
@@ -39,9 +40,11 @@ export function chatPage() {
 function scrollTop() {
     const chatContainer = $('#chat-messages');
     if (chatContainer.scrollTop() === 0) {
+        debugger;
         console.log("Scrolled to the top!");
         offset += 10;
         // console.log("Offset:", offset);
+        debugger;
         const throttledOpenChat = throttle(() => openChat(), 100);
         throttledOpenChat();
     }
@@ -55,7 +58,6 @@ export function openChat() {
         alert('User ID is missing');
         return;
     }
-
     const opener = { type: 'chatOpen', RecipientID: userId_Parsed, Offset: offset };
     if (socket) {
         socket.send(JSON.stringify(opener));
@@ -189,7 +191,6 @@ export function loadOldMessages(data) {
         const previousScrollHeight = chatContainer.scrollHeight;
         const fragment = document.createDocumentFragment();
         data.messages.forEach((messageData, index) => {
-            console.log(`Message ${index}:`, messageData);
             const messageElement = createMessageElement({
                 From: messageData.username || 'Unknown',
                 Message: messageData.content || 'No content',

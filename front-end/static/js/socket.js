@@ -11,19 +11,14 @@ export async function setupWebSocket() {
         // Handle when the WebSocket connection is opened
         socket.onopen = function (event) {
             UsersList.requestOnlineUsers();
-            if (window.location.href.includes('chat')) {
-                Chat.openChat()
-            }
             console.log('Connection opened');
             resolve(socket);  // Resolve the promise when the connection is established
         };
 
         // Handle incoming messages from the server
         socket.onmessage = function (event) {
-            console.log('Message received:', event.data);  // Log raw data received
             const data = JSON.parse(event.data);
-            console.log('Parsed message data:', data);  // Log parsed data
-
+            debugger
             switch (data.type) {
                 case 'onlineUsers':
                     UsersList.populateOnlineUserList(data.users);

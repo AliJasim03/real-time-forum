@@ -79,15 +79,15 @@ export function updateOnlineUserList(userId) {
     debugger;
     const userLink = document.getElementById(`user-status-${userId}`);
     if (userLink) {
-        userLink.nextElementSibling.textContent = 'Online';
-        userLink.nextElementSibling.className = 'badge bg-success';
+        userLink.textContent = 'Online';
+        userLink.className = 'badge bg-success';
     }
 }
 export function updateOfflineUser(userId) {
     const userLink = document.getElementById(`user-status-${userId}`);
     if (userLink) {
-        userLink.nextElementSibling.textContent = 'Offline';
-        userLink.nextElementSibling.className = 'badge bg-secondary';
+        userLink.textContent = 'Offline';
+        userLink.className = 'badge bg-secondary';
     }
 }
 
