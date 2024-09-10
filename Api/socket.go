@@ -155,24 +155,27 @@ func (s *server) removeConnection(userId int) {
 }
 
 func (s *server) SendMessage(userID int, message []byte) {
-	log.Println("SendMessage function started")
-	var chatMessage ChatMessage
+    log.Println("SendMessage function started")
+    var chatMessage ChatMessage
 
-	if err := json.Unmarshal(message, &chatMessage); err != nil {
-		log.Printf("Error unmarshaling message: %v", err)
-		return
-	}
-	// Add user ID to the message
-	chatMessage.From = userID
-	err := backend.SaveMessage(s.db, chatMessage.Message, chatMessage.To, userID)
-	if err != nil {
-		log.Printf("Error saving message: %v", err)
-		return
-	}
+    if err := json.Unmarshal(message, &chatMessage); err != nil {
+        log.Printf("Error unmarshaling message: %v", err)
+        return
+    }
 
-	s.forwardMessage(chatMessage)
-	log.Println("Message forwarded, ready for the next message.")
+    chatMessage.From = userID
+    chatMessage.UserName = backend.GetUsername(s.db, userID)
+
+    err := backend.SaveMessage(s.db, chatMessage.Message, chatMessage.To, userID)
+    if err != nil {
+        log.Printf("Error saving message: %v", err)
+        return
+    }
+
+    s.forwardMessage(chatMessage)
+    log.Println("Message forwarded, ready for the next message.")
 }
+
 
 func (s *server) LastMessage(conn *websocket.Conn, userID int, message []byte) {
 	var load ChatPayload

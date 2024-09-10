@@ -67,7 +67,7 @@ export function openChat() {
 function sendMessage() {
     const userID = window.location.href.split('?')[1].split('=')[1];
     const message = $('#message-input').val();
-    let senderUser = 'checker'
+    let senderUser = currentUsername;
     if (userID === undefined || userID === '') {
         alert('User ID is missing');
         return;
@@ -100,12 +100,13 @@ function yourMessages(message) {
 }
 
 export function handleChatMessage(data) {
+    debugger;
     console.log("Received data:", data);
     try {
         if (data !== null && typeof data === 'object') {
-            console.log(data.from, data.message, data.fromUserName);
+            console.log(data.from, data.message, data.username);
                 // displayNotification(data.from);
-                displayNewMessage(data.from, data.message, data.fromUserName);
+                displayNewMessage(data.from, data.message, data.username);
         } else {
             console.error("Invalid message format:", data);
         }
@@ -214,12 +215,12 @@ export function loadOldMessages(data) {
 
 function displayNotification(from) {
     console.log('display nitfication work')
-    alert('You have a new message from ' + from);
-    // const userID = window.location.href.split('?')[1].split('=')[1];
-    // if (from !== parseInt(userID)) {
+    // alert('You have a new message from ' + from);
+    //const userID = window.location.href.split('?')[1].split('=')[1];
+     if (from /*!== parseInt(userID)*/) {
         const alertBadge = $('#user-alert-' + from); // Store current username
         alertBadge.css('display', 'inline'); // Use jQuery's css method to change the display property
-    // }
+     }
 }
 
 const throttle = (fn, delay) => {
