@@ -1,4 +1,5 @@
 // Function to add a comment to the page
+import { postPage } from "./postDetails.js";
 export function generateComment(comment) {
     return `<div class="card mb-4" id="${comment.ID}">
                         <div class="card-body">
@@ -52,13 +53,15 @@ export function submitComment(postId) {
         .then(response => {
             if (!response.ok) {
                 return response.text().then(text => { throw new Error(text) });
+            }else{
+                postPage(postId);
             }
             return response.json();
         })
-        .then(response => {
+        /*.then(response => {
             // Refresh the comments section
             postPage(postId);
-        })
+        })*/
         .catch(error => {
             showError(error.message);
         });
@@ -113,15 +116,3 @@ export function updateCommentCounters(commentID) {
         }
     });
 }
-
-// Example usage
-const comment = {
-    ID: "123",
-    Content: "This is a new comment",
-    CreatedBy: "User",
-    CreatedOn: "2024-07-06",
-    Like: {
-        IsLiked: false,
-        IsDisliked: false
-    }
-};
