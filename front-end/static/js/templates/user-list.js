@@ -42,7 +42,7 @@ export function populateOnlineUserList(users) {
 
         const typingSVG = document.createElement('span');
         typingSVG.id = `user-typing-${user.ID}`;
-        typingSVG.style.display = 'inline'; // Initially hide the SVG
+        typingSVG.style.display = 'none'; // Initially hide the SVG
         typingSVG.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
                 <circle cx="4" cy="12" r="3" fill="currentColor">
