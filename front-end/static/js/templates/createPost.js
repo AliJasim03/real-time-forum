@@ -61,7 +61,7 @@ export function createPost() {
     // Check if the title and content are empty or contain only spaces
     if (title === "" || content === "") {
         showError("Title and Content are required");
-        createBtn.disabled = false;
+        createBtn.prop('disabled', false);
         return;
     }
     // Check if the categories are empty

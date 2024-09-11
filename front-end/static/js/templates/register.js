@@ -1,4 +1,4 @@
-import { isLoggedIn, navigate, updateNavbar } from '../app.js'; // Adjust the import path based on your directory structure
+import { registerAction } from '../app.js';
 
 export function registerPage() {
     const app = $('#app');
@@ -65,72 +65,9 @@ export function registerPage() {
     });
 }
 
-export function registerAction() {
-
-    const firstName = $('#first-name').val().trim();
-    const lastName = $('#last-name').val().trim();
-    const age = $('#age').val().trim();
-    const gender = $('input[name="gender"]:checked').val();
-    const email = $('#email').val().trim();
-    const username = $('#username').val().trim();
-    const password = $('#password').val().trim();
-
-    // Check if there are empty fields or contain only spaces
-    if (
-        !firstName ||
-        !lastName ||
-        !age ||
-        !gender ||
-        !email ||
-        !username ||
-        !password
-    ) {
-        showError("Missing required fields");
-        return;
-    }
-
-    const ageNum = parseInt(age);
-
-    if (!validationFields(ageNum, email, username, password)) {
-        return;
-    }
-
-    const data = JSON.stringify({
-        first_name: firstName,
-        last_name: lastName,
-        age: ageNum,
-        email: email,
-        gender: gender,
-        username: username,
-        password: password,
-    });
-
-    fetch('/api/registerAction', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: data
-    })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => { throw new Error(text) });
-            }
-            // Handle successful registration
-            showSuccess("Registration successful");
-            setTimeout(() => {
-                isLoggedIn = true;
-                navigate('/'); // Redirect to the login page
-                updateNavbar(true);
-            }, 300);
-        })
-        .catch(error => {
-            showError(error.message);
-        });
-}
 
 
-function validationFields(ageNum, email, username, password) {
+export function validationFields(ageNum, email, username, password) {
     if (isNaN(ageNum) || ageNum < 1) {
         showError("Invalid age");
         return false;

@@ -133,6 +133,72 @@ export function loginAction() {
         });
 }
 
+export function registerAction() {
+
+    const firstName = $('#first-name').val().trim();
+    const lastName = $('#last-name').val().trim();
+    const age = $('#age').val().trim();
+    const gender = $('input[name="gender"]:checked').val();
+    const email = $('#email').val().trim();
+    const username = $('#username').val().trim();
+    const password = $('#password').val().trim();
+
+    // Check if there are empty fields or contain only spaces
+    if (
+        !firstName ||
+        !lastName ||
+        !age ||
+        !gender ||
+        !email ||
+        !username ||
+        !password
+    ) {
+        showError("Missing required fields");
+        return;
+    }
+
+    const ageNum = parseInt(age);
+
+    if (!Templates.Register.validationFields(ageNum, email, username, password)) {
+        return;
+    }
+
+    const data = JSON.stringify({
+        first_name: firstName,
+        last_name: lastName,
+        age: ageNum,
+        email: email,
+        gender: gender,
+        username: username,
+        password: password,
+    });
+
+    fetch('/api/registerAction', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: data
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => { throw new Error(text) });
+            }
+            // Handle successful registration
+            showSuccess("Registration successful");
+            setTimeout(() => {
+                debugger
+                isLoggedIn = true;
+                navigate('/'); // Redirect to the login page
+                updateNavbar(true);
+            }, 300);
+        })
+        .catch(error => {
+            showError(error.message);
+        });
+}
+
+
 async function logout() {
     fetch('/api/logout', {
         method: 'GET',

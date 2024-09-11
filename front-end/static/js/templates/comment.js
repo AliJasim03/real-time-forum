@@ -1,6 +1,7 @@
 // Function to add a comment to the page
 import { postPage } from "./postDetails.js";
 export function generateComment(comment) {
+    comment.Content = escapeHTML(comment.Content);
     return `<div class="card mb-4" id="${comment.ID}">
                         <div class="card-body">
                             <p class="card-text">${comment.Content}</p>
@@ -53,15 +54,11 @@ export function submitComment(postId) {
         .then(response => {
             if (!response.ok) {
                 return response.text().then(text => { throw new Error(text) });
-            }else{
+            } else {
                 postPage(postId);
             }
             return response.json();
         })
-        /*.then(response => {
-            // Refresh the comments section
-            postPage(postId);
-        })*/
         .catch(error => {
             showError(error.message);
         });

@@ -103,7 +103,6 @@ func (s *server) handleMessages(conn *websocket.Conn, userID int) {
 		case "chat":
 			// log.Println("chat handel work")
 			s.SendMessage(userID, message)
-			s.sendOnlineUsers(conn, userID)
 			break
 		case "stopTyping":
 			s.sendTypingStatus(userID, message)
@@ -243,5 +242,4 @@ func (s *server) sendTypingStatus(userID int, message []byte) {
 			break
 		}
 	}
-
 }

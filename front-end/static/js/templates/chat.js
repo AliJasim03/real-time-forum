@@ -35,23 +35,22 @@ export function chatPage() {
     $('#chat-messages').on('scroll', scrollTop);
 
     let isTyping = false;
-    let typingTimer;        
-    
+    let typingTimer;
+
     document.getElementById('message-input').addEventListener('keydown', function () {
         if (!isTyping) {
-            socket.send(JSON.stringify({ type: 'typing',to: userID, typing: true }));
+            socket.send(JSON.stringify({ type: 'typing', to: userID, typing: true }));
             isTyping = true;
         }
         clearTimeout(typingTimer);
     });
-    
+
     document.getElementById('message-input').addEventListener('keyup', function () {
-        debugger;
         clearTimeout(typingTimer);
         typingTimer = setTimeout(function () {
-            socket.send(JSON.stringify({ type: 'stopTyping',to: userID, typing: false }));
+            socket.send(JSON.stringify({ type: 'stopTyping', to: userID, typing: false }));
             isTyping = false;
-        }, 1000); // Stop typing after 1 second of inactivity
+        }, 1533); // Stop typing after 1 second of inactivity
     });
 
 
@@ -85,6 +84,7 @@ export function openChat() {
 }
 
 function sendMessage() {
+    debugger;
     const message = $('#message-input').val();
     let senderUser = currentUsername;
     if (userID === undefined || userID === '') {
@@ -215,7 +215,7 @@ export function loadOldMessages(data) {
         chatContainer.prepend(fragment);
         chatContainer.scrollTop = chatContainer.scrollHeight - previousScrollHeight;
     } else {
-       console.log("No messages to display or invalid data format.");
+        console.log("No messages to display or invalid data format.");
     }
 }
 

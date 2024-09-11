@@ -54,7 +54,8 @@ export async function loadPosts(filterUrl) {
         .then(data => {
             const postsContainer = $('#posts-container');
             data.forEach(post => {
-
+                post.Title = escapeHTML(post.Title);
+                post.Content = escapeHTML(post.Content);
                 const postDiv = $('<div>', {
                     class: `col-md-6 mb-5 ${post.Categories.join(' ')}`,
                     id: post.ID,
