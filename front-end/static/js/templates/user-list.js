@@ -13,9 +13,11 @@ export function populateOnlineUserList(users) {
     const userList = $('#user-list');
     userList.html('');
 
+    users.sort((a, b) => b.IsOnline - a.IsOnline);
     users.forEach(user => {
         const userItem = document.createElement('li');
         userItem.className = 'list-group-item';
+        userItem.id = `user-row-${user.ID}`;
 
         // Create a container to hold the entire user item, allowing for flexible layout
         const userContainer = document.createElement('div');
@@ -36,6 +38,7 @@ export function populateOnlineUserList(users) {
         const typingSVG = document.createElement('span');
         typingSVG.id = `user-typing-${user.ID}`;
         typingSVG.style.display = 'none'; // Initially hide the SVG
+        typingSVG.style.marginRight = '0.5em';
         typingSVG.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
                 <circle cx="4" cy="12" r="3" fill="currentColor">
@@ -98,6 +101,7 @@ export function updateOnlineUserList(userId) {
     if (userLink) {
         userLink.textContent = 'Online';
         userLink.className = 'badge bg-success';
+        pushMessageTop(userId);
     }
 }
 export function updateOfflineUser(userId) {
@@ -113,6 +117,7 @@ export function updateTypingStatus(userId, typing) {
     if (alertBadge) {
         if (typing) {
             alertBadge.style.display = 'inline';
+            pushMessageTop(userId);
         } else {
             alertBadge.style.display = 'none';
         }
@@ -127,4 +132,10 @@ export function requestOnlineUsers() {
     socket.send(JSON.stringify(message));
 }
 
-
+export function pushMessageTop(userId) {
+    const userRow = document.getElementById(`user-row-${userId}`);
+    if (userRow) {
+        const parent = userRow.parentNode;
+        parent.insertBefore(userRow, parent.firstChild);
+    }
+}
