@@ -33,13 +33,6 @@ export function populateOnlineUserList(users) {
         const badgesContainer = document.createElement('div');
         badgesContainer.className = 'd-flex align-items-center';
 
-        // Create the exclamation mark badge, initially hidden
-        // const typing = document.createElement('span');
-        // typing.id = `user-typing-${user.ID}`;
-        // typing.className = 'badge bg-warning text-dark ms-1 me-1'; // Margin left and right
-        // typing.textContent = 'typing...';
-        // typing.style.display = 'none'; // Initially hide the badge
-
         const typingSVG = document.createElement('span');
         typingSVG.id = `user-typing-${user.ID}`;
         typingSVG.style.display = 'none'; // Initially hide the SVG
@@ -115,12 +108,12 @@ export function updateOfflineUser(userId) {
     }
 }
 
-export function updateTypingStatus(userId,typing) {
+export function updateTypingStatus(userId, typing) {
     const alertBadge = document.getElementById(`user-typing-${userId}`);
     if (alertBadge) {
         if (typing) {
             alertBadge.style.display = 'inline';
-        }else{
+        } else {
             alertBadge.style.display = 'none';
         }
     }
