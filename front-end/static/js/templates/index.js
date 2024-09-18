@@ -20,9 +20,9 @@ export const index = `
             $("#categories").on("change", function () {
                 const category = $(this).val();
                 if (category === "All") {
-                    $(".col-md-4").show();
+                    $(".col-md-6").show();
                 } else {
-                    $(".col-md-4").hide();
+                    $(".col-md-6").hide();
                     $("." + category).show();
                 }
             });
