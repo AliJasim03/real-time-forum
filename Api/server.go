@@ -36,6 +36,7 @@ func (s *server) Init() {
 	// API routes
 	s.mux.HandleFunc("/api/loginAction", s.login)
 	s.mux.HandleFunc("/api/registerAction", s.registration)
+	s.mux.HandleFunc("/api/whoami", s.whoami)
 	s.mux.HandleFunc("/api/logout", s.logout)
 	s.mux.HandleFunc("/api/checkAuth", s.checkAuth)
 	s.mux.HandleFunc("/api/categories", s.getCategories)

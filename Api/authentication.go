@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	backend "forum/db"
+
 	"github.com/gofrs/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -212,16 +214,9 @@ func (s *server) logout(res http.ResponseWriter, req *http.Request) {
 func (s *server) whoami(res http.ResponseWriter, req *http.Request) {
 	authenticateCookie, userID := s.authenticateCookie(req)
 	if !authenticateCookie {
-		http.Error(res, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-
-	var username string
-	err := s.db.QueryRow("SELECT username FROM users WHERE id = ?", userID).Scan(&username)
-	if err != nil {
-		http.Error(res, "Server error", http.StatusInternalServerError)
-		return
-	}
+	username := backend.GetUsername(s.db, userID)
 	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(http.StatusOK)
 	json.NewEncoder(res).Encode(Username{Username: username})

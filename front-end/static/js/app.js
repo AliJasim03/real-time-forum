@@ -151,7 +151,7 @@ export function whoami() {
     }).then(data => {
         debugger
         $('#welcome-user').removeClass('d-none');
-        $('#welcome-user').text('Welcome ' + data.Username);
+        $('#welcome-user').text('Welcome ' + data.username);
     }).catch(error => {
         showError(error.message);
     });
