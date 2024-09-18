@@ -1,4 +1,5 @@
 import { socket } from '../socket.js';
+import { pushMessageTop } from './user-list.js';
 
 var offset = 0;
 var currentUsername; // Variable to store the current username
@@ -95,7 +96,7 @@ function sendMessage() {
         let userId_Parsed = parseInt(userID);
         const chatMessage = { type: 'chat', to: userId_Parsed, message: message, username: senderUser };
         yourMessages(message);
-
+        pushMessageTop(userId_Parsed);
         socket.send(JSON.stringify(chatMessage));
         $('#message-input').val('');
     }
@@ -119,6 +120,7 @@ function yourMessages(message) {
 export function handleChatMessage(data) {
     try {
         if (data !== null && typeof data === 'object') {
+            debugger;
             console.log(data.from, data.message, data.username);
             displayNotification(data.from);
             displayNewMessage(data.from, data.message, data.username);

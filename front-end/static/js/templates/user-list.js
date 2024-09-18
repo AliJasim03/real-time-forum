@@ -13,7 +13,7 @@ export function populateOnlineUserList(users) {
     const userList = $('#user-list');
     userList.html('');
 
-    users.sort((a, b) => b.IsOnline - a.IsOnline);
+    //    users.sort((a, b) => b.IsOnline - a.IsOnline);
     users.forEach(user => {
         const userItem = document.createElement('li');
         userItem.className = 'list-group-item';
