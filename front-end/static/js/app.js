@@ -136,7 +136,6 @@ export function loginAction() {
 }
 
 export function whoami() {
-    debugger
     fetch('/api/whoami', {
         method: 'GET',
         headers: {
@@ -153,7 +152,7 @@ export function whoami() {
         $('#welcome-user').removeClass('d-none');
         $('#welcome-user').text('Welcome ' + data.username);
     }).catch(error => {
-        showError(error.message);
+        //showError(error.message);
     });
 }
 

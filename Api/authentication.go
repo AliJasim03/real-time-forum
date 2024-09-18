@@ -214,6 +214,7 @@ func (s *server) logout(res http.ResponseWriter, req *http.Request) {
 func (s *server) whoami(res http.ResponseWriter, req *http.Request) {
 	authenticateCookie, userID := s.authenticateCookie(req)
 	if !authenticateCookie {
+		http.Error(res, "Please log in to continue", http.StatusBadRequest)
 		return
 	}
 	username := backend.GetUsername(s.db, userID)
