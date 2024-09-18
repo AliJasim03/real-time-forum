@@ -36,6 +36,10 @@ var emptyCookie = &http.Cookie{
 	Path:     "/",
 }
 
+type Username struct {
+	Username string `json:"username"`
+}
+
 func (s *server) registration(res http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		http.Error(res, "method not allowed", http.StatusMethodNotAllowed)
@@ -203,6 +207,24 @@ func (s *server) logout(res http.ResponseWriter, req *http.Request) {
 	http.SetCookie(res, emptyCookie)
 	// set stats to ok
 	res.WriteHeader(http.StatusOK)
+}
+
+func (s *server) whoami(res http.ResponseWriter, req *http.Request) {
+	authenticateCookie, userID := s.authenticateCookie(req)
+	if !authenticateCookie {
+		http.Error(res, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var username string
+	err := s.db.QueryRow("SELECT username FROM users WHERE id = ?", userID).Scan(&username)
+	if err != nil {
+		http.Error(res, "Server error", http.StatusInternalServerError)
+		return
+	}
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(http.StatusOK)
+	json.NewEncoder(res).Encode(Username{Username: username})
 }
 
 func (s *server) checkAuth(res http.ResponseWriter, req *http.Request) {

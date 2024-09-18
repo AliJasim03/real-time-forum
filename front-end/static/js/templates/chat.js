@@ -84,7 +84,6 @@ export function openChat() {
 }
 
 function sendMessage() {
-    debugger;
     const message = $('#message-input').val();
     let senderUser = currentUsername;
     if (userID === undefined || userID === '') {
@@ -123,6 +122,7 @@ export function handleChatMessage(data) {
             console.log(data.from, data.message, data.username);
             displayNotification(data.from);
             displayNewMessage(data.from, data.message, data.username);
+            pushMessageTop(data.from);
         } else {
             console.error("Invalid message format:", data);
         }

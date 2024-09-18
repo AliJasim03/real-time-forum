@@ -1,3 +1,4 @@
+import { navigate } from '../app.js';
 export async function createPostPage() {
     // Fetch categories from the backend
     fetch('/api/categories')
@@ -76,7 +77,6 @@ export function createPost() {
         Content: content,
         Categories: categories
     });
-
     fetch('/api/createPostAction', {
         method: 'POST',
         headers: {
@@ -93,8 +93,8 @@ export function createPost() {
         .then(response => {
             showSuccess("Post Created Successfully");
             setTimeout(() => {
-                window.location.href = 'post?id=' + response;
-            }, 3000);
+                navigate('/post?id=' + response);
+            }, 2000);
         })
         .catch(error => {
             showError(error.message);

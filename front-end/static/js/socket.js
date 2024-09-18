@@ -17,7 +17,6 @@ export async function setupWebSocket() {
 
         // Handle incoming messages from the server
         socket.onmessage = function (event) {
-            debugger;   
             const data = JSON.parse(event.data);
             switch (data.type) {
                 case 'onlineUsers':
@@ -41,7 +40,7 @@ export async function setupWebSocket() {
                 case 'error':
                     showError(data.message);
                     break;
-                    //devonly
+                //devonly
                 case 'typing':
                     UsersList.updateTypingStatus(data.from, data.typing);
                     break;

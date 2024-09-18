@@ -40,6 +40,7 @@ export function updateView(path) {
     path = path.split('?')[0];
     const view = routes[path];
     if (view) {
+        whoami();
         view();
     }
 }
@@ -78,6 +79,7 @@ export async function checkAuth() {
             'Content-Type': 'application/json'
         }
     }).then(response => {
+        console.log(response);
         if (!response.ok) {
             return response.text().then(text => { throw new Error(text) });
         }
@@ -131,6 +133,28 @@ export function loginAction() {
         .catch(error => {
             showError(error.message);
         });
+}
+
+export function whoami() {
+    debugger
+    fetch('/api/whoami', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {
+        debugger;
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text) });
+        }
+        return response.json(); // Parse the response as JSON
+    }).then(data => {
+        debugger
+        $('#welcome-user').removeClass('d-none');
+        $('#welcome-user').text('Welcome ' + data.Username);
+    }).catch(error => {
+        showError(error.message);
+    });
 }
 
 export function registerAction() {
@@ -187,10 +211,10 @@ export function registerAction() {
             // Handle successful registration
             showSuccess("Registration successful");
             setTimeout(() => {
-                debugger
                 isLoggedIn = true;
                 navigate('/'); // Redirect to the login page
                 updateNavbar(true);
+                setupWebSocket(); // Call the function to set up the WebSocket connection
             }, 300);
         })
         .catch(error => {

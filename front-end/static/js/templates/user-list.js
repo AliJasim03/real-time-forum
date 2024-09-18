@@ -101,7 +101,6 @@ export function updateOnlineUserList(userId) {
     if (userLink) {
         userLink.textContent = 'Online';
         userLink.className = 'badge bg-success';
-        pushMessageTop(userId);
     }
 }
 export function updateOfflineUser(userId) {
@@ -117,7 +116,6 @@ export function updateTypingStatus(userId, typing) {
     if (alertBadge) {
         if (typing) {
             alertBadge.style.display = 'inline';
-            pushMessageTop(userId);
         } else {
             alertBadge.style.display = 'none';
         }
